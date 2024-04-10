@@ -1,0 +1,16 @@
+{
+  "extends": "@quasar/app-vite/tsconfig-preset",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "types": [
+      // ...
+      "vue-cesium/global",
+      "vue-cesium/Cesium"
+    ]
+  },
+  "include": [
+    "src/**/*",
+    "node_modules/vue-cesium/Cesium.d.ts",
+    "node_modules/vue-cesium/global.d.ts"
+  ]
+}
