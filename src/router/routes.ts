@@ -6,7 +6,6 @@ const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '', component: () => import('pages/IndexPage.vue') },
-      { path: 'cesiummap', component: () => import('pages/CesiumMap.vue') },
       { path: 'vuecesium', component: () => import('pages/VueCesium.vue') },
     ],
   },

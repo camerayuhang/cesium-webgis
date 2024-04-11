@@ -1,25 +1,60 @@
 <template>
-  <vc-overlay-windmap ref="wind" v-if="windData !== null" :data="windData" :options="particleSystemOptions">
+  <vc-overlay-windmap
+    ref="wind"
+    v-if="windData !== null"
+    :data="windData"
+    :options="visualizationOptionsStore.particleSystemOptions"
+  >
   </vc-overlay-windmap>
 </template>
 
 <script lang="ts" setup>
 import { NetCDFData } from 'src/types/NetCDFData';
+import { useVisualizationOptionsStore } from 'src/stores/VisualizationOptionsStore';
+const visualizationOptionsStore = useVisualizationOptionsStore();
 
 interface Prop {
   windData?: NetCDFData;
 }
-defineProps<Prop>();
+withDefaults(defineProps<Prop>(), {
+  windData: () => {
+    return {
+      dimensions: {
+        lon: 1,
+        lat: 1,
+        lev: 1,
+      },
+      lon: {
+        array: new Float32Array(),
+        min: 1,
+        max: 1,
+        delta: 1,
+      },
+      lat: {
+        array: new Float32Array(),
+        min: 1,
+        max: 1,
+        delta: 1,
+      },
+      lev: {
+        array: new Float32Array(),
+        min: 1,
+        max: 1,
+      },
+      U: {
+        array: new Float32Array(),
+        min: 1,
+        max: 1,
+      },
+      V: {
+        array: new Float32Array(),
+        min: 1,
+        max: 1,
+      },
+    };
+  },
+});
 
-const particleSystemOptions = {
-  maxParticles: 64 * 64,
-  particleHeight: 100.0,
-  fadeOpacity: 0.996,
-  dropRate: 0.003,
-  dropRateBump: 0.01,
-  speedFactor: 1.0,
-  lineWidth: 4.0,
-};
 const viewerParameters = {
   latRange: [0, 70],
   lonRange: [74, 140],
