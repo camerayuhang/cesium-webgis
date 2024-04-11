@@ -39,10 +39,10 @@ import EssentialLink, { EssentialLinkProps } from 'components/EssentialLink.vue'
 import { TabLink } from 'src/types/TabLink';
 
 const tabLinks: TabLink[] = [
-  {
-    title: 'CesiumMap',
-    link: 'cesiummap',
-  },
+  // {
+  //   title: 'CesiumMap',
+  //   link: 'cesiummap',
+  // },
   {
     title: 'VueCesium',
     link: 'vuecesium',
