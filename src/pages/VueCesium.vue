@@ -109,7 +109,7 @@ import TabMenuCom from 'src/components/widgets/TabMenuCom.vue';
 import { useVisualizationOptionsStore } from 'src/stores/VisualizationOptionsStore';
 
 const loading = ref(true);
-const animation = ref(false);
+const animation = ref(true);
 const timeline = ref(true);
 const baseLayerPicker = ref(true);
 const fullscreenButton = ref(false);
