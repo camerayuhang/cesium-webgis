@@ -39,7 +39,7 @@ const tab = ref('MapOptions');
 
 <style lang="scss">
 .sc-widget-container {
-  height: 70vh;
+  height: 60vh;
   overflow: scroll;
 }
 </style>
