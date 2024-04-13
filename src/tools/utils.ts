@@ -82,4 +82,9 @@ const loadNetCDF = (filePath: string) => {
     request.send();
   });
 };
-export { loadNetCDF };
+
+const imageToUrl = (file: File) => {
+  const objectURL = URL.createObjectURL(file);
+  return objectURL;
+};
+export { loadNetCDF, imageToUrl };

@@ -39,6 +39,7 @@
       <q-space />
     </q-bar>
     <vc-viewer
+      class="relative-position"
       :animation="animation"
       :base-layer-picker="baseLayerPicker"
       :timeline="timeline"
@@ -68,6 +69,7 @@
         </vc-entity> -->
 
       <WindMap :windData="windData" v-if="visualizationOptionsStore.overlayWindMap"></WindMap>
+      <new-place-mark-panel v-if="!loading"></new-place-mark-panel>
 
       <!-- Cesium Imagery -->
       <vc-layer-imagery>
@@ -107,6 +109,7 @@ import { NetCDFData } from 'src/types/NetCDFData';
 import WindMap from 'src/components/WindMap.vue';
 import TabMenuCom from 'src/components/widgets/TabMenuCom.vue';
 import { useVisualizationOptionsStore } from 'src/stores/VisualizationOptionsStore';
+import NewPlaceMarkPanel from 'src/components/widgets/VisualizationOptions/AddPlaceMarkOption/NewPlaceMarkPanel.vue';
 
 const loading = ref(true);
 const animation = ref(true);
