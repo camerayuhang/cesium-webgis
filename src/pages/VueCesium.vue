@@ -91,17 +91,7 @@
 </template>
 
 <script setup lang="ts">
-// import {
-//   VcConfigProvider,
-//   VcViewer,
-//   VcNavigation,
-//   VcEntity,
-//   VcGraphicsBillboard,
-//   VcGraphicsRectangle,
-//   VcLayerImagery,
-//   VcImageryProviderTianditu,
-// } from 'vue-cesium';
-import { VcPosition, VcCompassEvt, VcZoomEvt, VcPickEvent } from 'vue-cesium/es/utils/types';
+import { VcCompassEvt, VcZoomEvt } from 'vue-cesium/es/utils/types';
 
 import { ref, watch } from 'vue';
 import { loadNetCDF } from 'src/tools/utils';
@@ -132,17 +122,17 @@ const otherOpts = ref({
   position: 'bottom-right',
 });
 
-const point = ref({
-  pixelSize: 28,
-  color: 'red',
-});
+// const point = ref({
+//   pixelSize: 28,
+//   color: 'red',
+// });
 
-const position = ref({ lng: 108, lat: 32 } as VcPosition);
+// const position = ref({ lng: 108, lat: 32 } as VcPosition);
 
-const label = ref({
-  text: 'Hello World',
-  pixelOffset: [0, 150],
-});
+// const label = ref({
+//   text: 'Hello World',
+//   pixelOffset: [0, 150],
+// });
 
 watch(timeline, (val) => {
   otherOpts.value.offset = val ? [0, 30] : fullscreenButton.value ? [30, 5] : [0, 5];
@@ -159,9 +149,9 @@ watch(fullscreenButton, (val) => {
 const onNavigationEvt = (e: VcCompassEvt | VcZoomEvt) => {
   console.log(e);
 };
-const onEntityClick = (e: VcPickEvent) => {
-  console.log(e);
-};
+// const onEntityClick = (e: VcPickEvent) => {
+//   console.log(e);
+// };
 
 const ready = () => {
   // window.vm = this;

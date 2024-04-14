@@ -29,6 +29,13 @@ const defaultStyle = (entity: Cesium.Entity) => {
   (entity.point as Cesium.PointGraphics).pixelSize = new Cesium.ConstantProperty(10);
 };
 
+const cancleHightlight = (entity: Cesium.Entity | null) => {
+  if (entity) {
+    defaultStyle(entity);
+    placemarkStore.visible = false;
+  }
+};
+
 const createPlaceMark = () => {
   const entity = new Cesium.Entity({
     point: {
@@ -39,13 +46,14 @@ const createPlaceMark = () => {
   defaultStyle(entity);
 
   return entity;
-  // viewer.entities.add(placeMark);
 };
 
 const movingPlaceMark = createPlaceMark();
 viewer.entities.add(movingPlaceMark);
 
 const addPlaceMark = () => {
+  cancleHightlight(selectedEntity);
+
   removeScreenSpaceEvent();
 
   // entity that moves with mouse
@@ -102,22 +110,26 @@ const enableSelectPlacemark = () => {
   handler.setInputAction((event: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
     const pickedObject = scene.pick(event.position);
     if (Cesium.defined(pickedObject) && pickedObject.id) {
-      if (selectedEntity) {
-        defaultStyle(selectedEntity);
-        placemarkStore.visible = false;
-      }
+      cancleHightlight(selectedEntity);
       selectedEntity = pickedObject.id as Cesium.Entity;
       const position = selectedEntity.position?.getValue(viewer.clock.currentTime) as Cesium.Cartesian3;
       placemarkStore.setCurrentPlacemarkById(selectedEntity.id);
       hightlightStyle(selectedEntity);
       showPlacemarkPanel(position);
     } else {
-      if (selectedEntity) {
-        defaultStyle(selectedEntity);
-        placemarkStore.visible = false;
-      }
+      cancleHightlight(selectedEntity);
     }
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+  // turn mouse to hand
+  handler.setInputAction((event: Cesium.ScreenSpaceEventHandler.MotionEvent) => {
+    const pickedObject = scene.pick(event.endPosition);
+    if (Cesium.defined(pickedObject) && pickedObject.id) {
+      (viewer.container as HTMLDivElement).style.cursor = 'pointer';
+    } else {
+      (viewer.container as HTMLDivElement).style.cursor = 'default';
+    }
+  }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 };
 
 const removeScreenSpaceEvent = () => {
@@ -133,14 +145,4 @@ const showPlacemarkPanel = (position: Cesium.Cartesian3) => {
   }
   placemarkStore.visible = true;
 };
-
-// const action = (event: Cesium.ScreenSpaceEventHandler.MotionEvent | Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
-//   // get the cartesian position of the mouse when moving over the globe.ellipsoid
-
-//   }
-
-//   // if (cartesian) {
-//   //   const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
-//   // }
-// };
 </script>
