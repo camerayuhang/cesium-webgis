@@ -67,7 +67,7 @@
 <script setup lang="ts">
 import { usePlacemarkStore } from 'src/stores/PlacemarkStore';
 import { imageToUrl } from 'src/tools/utils';
-import { reactive, ref } from 'vue';
+import { ref } from 'vue';
 
 const placemarkStore = usePlacemarkStore();
 

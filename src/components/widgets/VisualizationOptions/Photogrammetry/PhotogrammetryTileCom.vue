@@ -15,7 +15,7 @@ const vcViewer = useVueCesium();
 const viewer = vcViewer.viewer;
 const scene = viewer.scene;
 
-const onCheckboxchanged = async (v: boolean, e: Event) => {
+const onCheckboxchanged = async (v: boolean) => {
   if (v) {
     // 倾斜摄影
     const tileset = await Cesium.Cesium3DTileset.fromIonAssetId(354759, { show: true });
