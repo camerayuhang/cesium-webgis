@@ -12,7 +12,6 @@
 import { NetCDFData } from 'src/types/NetCDFData';
 import { useVisualizationOptionsStore } from 'src/stores/VisualizationOptionsStore';
 const visualizationOptionsStore = useVisualizationOptionsStore();
-
 interface Prop {
   windData?: NetCDFData;
 }

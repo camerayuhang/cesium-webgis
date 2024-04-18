@@ -26,12 +26,22 @@
         </q-expansion-item>
       </q-item-section>
     </q-item>
+    <!-- 污染源扩散模拟 -->
+    <pollution-diffusion-com></pollution-diffusion-com>
+    <!-- 海洋温度标量场可视化 -->
+    <scalar-render-com></scalar-render-com>
+    <!-- 海洋流速矢量场可视化 -->
+    <vector-render-com></vector-render-com>
   </q-list>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useVisualizationOptionsStore } from 'src/stores/VisualizationOptionsStore';
+import ScalarRenderCom from 'src/components/widgets/VisualizationOptions/ScalarRenderCom.vue';
+import PollutionDiffusionCom from 'src/components/widgets/VisualizationOptions/PollutionDiffusionCom.vue';
+import VectorRenderCom from 'src/components/widgets/VisualizationOptions/VectorRenderCom.vue';
+
 const visualizationOptionsStore = useVisualizationOptionsStore();
 const particleSystemOptions = visualizationOptionsStore.particleSystemOptions;
 const expanded = ref(false);

@@ -84,21 +84,13 @@
       </vc-layer-imagery>
 
       <!-- <tool-bar></tool-bar> -->
-      <tab-menu-com v-if="!loading"></tab-menu-com> </vc-viewer
+      <tab-menu-com v-if="!loading"></tab-menu-com>
+      <panoramic-map-com></panoramic-map-com>
+      </vc-viewer
   ></q-page>
 </template>
 
 <script setup lang="ts">
-// import {
-//   VcConfigProvider,
-//   VcViewer,
-//   VcNavigation,
-//   VcEntity,
-//   VcGraphicsBillboard,
-//   VcGraphicsRectangle,
-//   VcLayerImagery,
-//   VcImageryProviderTianditu,
-// } from 'vue-cesium';
 import { VcPosition, VcCompassEvt, VcZoomEvt, VcPickEvent } from 'vue-cesium/es/utils/types';
 
 import { ref, watch } from 'vue';
@@ -106,7 +98,9 @@ import { loadNetCDF } from 'src/tools/utils';
 import { NetCDFData } from 'src/types/NetCDFData';
 import WindMap from 'src/components/WindMap.vue';
 import TabMenuCom from 'src/components/widgets/TabMenuCom.vue';
+import PanoramicMapCom from 'src/components/widgets/PanoramicMapCom.vue';
 import { useVisualizationOptionsStore } from 'src/stores/VisualizationOptionsStore';
+import PanoramicMapComVue from 'src/components/widgets/PanoramicMapCom.vue';
 
 const loading = ref(true);
 const animation = ref(false);
