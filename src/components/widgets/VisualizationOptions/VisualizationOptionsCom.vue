@@ -1,6 +1,12 @@
 <template>
   <q-list dense>
     <q-item-label header class="text-h6">Overlay</q-item-label>
+    <!-- 污染源扩散模拟 -->
+    <pollution-diffusion-com></pollution-diffusion-com>
+    <!-- 海洋温度标量场可视化 -->
+    <scalar-render-com></scalar-render-com>
+    <!-- 海洋流速矢量场可视化 -->
+    <vector-render-com></vector-render-com>
     <!-- 风场图功能 -->
     <wind-map-option-com></wind-map-option-com>
     <q-separator></q-separator>
@@ -13,7 +19,14 @@
 </template>
 
 <script setup lang="ts">
+
+import ScalarRenderCom from 'src/components/widgets/VisualizationOptions/ScalarRenderCom.vue';
+import PollutionDiffusionCom from 'src/components/widgets/VisualizationOptions/PollutionDiffusionCom.vue';
+import VectorRenderCom from 'src/components/widgets/VisualizationOptions/VectorRenderCom.vue';
+
+
 import AddPlaceMarkOptionCom from './AddPlaceMarkOption/AddPlaceMarkOptionCom.vue';
 import PhotogrammetryTileCom from './Photogrammetry/PhotogrammetryTileCom.vue';
 import WindMapOptionCom from './WindMapOption/WindMapOptionCom.vue';
+
 </script>

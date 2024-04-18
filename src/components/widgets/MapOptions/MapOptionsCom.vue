@@ -80,6 +80,7 @@ import type { VcViewerProvider, VcReadyObject } from 'vue-cesium/es/utils/types'
 
 const check1 = ref(true);
 const vcViewer = useVueCesium();
+
 const viewer = vcViewer.viewer;
 const globe = viewer.scene.globe;
 
@@ -108,8 +109,7 @@ watch(mapOptions, (newValue) => {
 });
 onMounted(() => {
   console.log('mounted');
-
-  console.log(vcViewer.viewer);
+  // console.log(vcViewer.viewer);
 });
 </script>
 
