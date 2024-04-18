@@ -23,7 +23,7 @@ const visualizationOptionsStore = useVisualizationOptionsStore();
 const isShow = ref(false);
 const viewer = useVueCesium().viewer;
 // 指定url
-const url = '/static/data/temp0_20160102.json';
+const url = './data/temp0_20160102.json';
 // 温度标量图可视化对象
 const scalarRenderObject = new ScalarRender(viewer, url);
 // 监听isShow的变化，控制效果显隐藏

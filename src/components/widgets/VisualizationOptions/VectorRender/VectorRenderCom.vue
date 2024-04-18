@@ -23,7 +23,7 @@ const userInput = {
   speedFactor: 10.0,
   lineWidth: 5.0,
 };
-const url = '/static/data/ubar_vbar_20160102.json';
+const url = './data/ubar_vbar_20160102.json';
 //海洋流场可视化对象
 const vectorRenderObject = new VectorRender(viewer, userInput, url);
 // 监听isShow的变化，控制效果显隐藏

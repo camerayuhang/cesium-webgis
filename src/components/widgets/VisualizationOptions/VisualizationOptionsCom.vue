@@ -19,14 +19,11 @@
 </template>
 
 <script setup lang="ts">
-
-import ScalarRenderCom from 'src/components/widgets/VisualizationOptions/ScalarRenderCom.vue';
-import PollutionDiffusionCom from 'src/components/widgets/VisualizationOptions/PollutionDiffusionCom.vue';
-import VectorRenderCom from 'src/components/widgets/VisualizationOptions/VectorRenderCom.vue';
-
+import ScalarRenderCom from 'src/components/widgets/VisualizationOptions/ScalarRender/ScalarRenderCom.vue';
+import PollutionDiffusionCom from 'src/components/widgets/VisualizationOptions/PollutionDiffusion/PollutionDiffusionCom.vue';
+import VectorRenderCom from 'src/components/widgets/VisualizationOptions/VectorRender/VectorRenderCom.vue';
 
 import AddPlaceMarkOptionCom from './AddPlaceMarkOption/AddPlaceMarkOptionCom.vue';
 import PhotogrammetryTileCom from './Photogrammetry/PhotogrammetryTileCom.vue';
 import WindMapOptionCom from './WindMapOption/WindMapOptionCom.vue';
-
 </script>

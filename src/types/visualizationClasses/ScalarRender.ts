@@ -63,7 +63,13 @@ class ScalarRender {
         '#a50026',
       ]; //红渐变黄的颜色
       // 绘制插值结果
-      kriging.plot(this.canvas, grid, [bounds[0][0], bounds[2][0]], [bounds[0][1], bounds[1][1]], colors);
+      kriging.plot(
+        this.canvas as HTMLCanvasElement,
+        grid,
+        [bounds[0][0], bounds[2][0]],
+        [bounds[0][1], bounds[1][1]],
+        colors
+      );
       // 矩形范围
       this.rectangle = new Cesium.Rectangle(
         Cesium.Math.toRadians(bounds[0][0]),
@@ -82,7 +88,7 @@ class ScalarRender {
     // 添加
     this.scalarField = viewer.imageryLayers.addImageryProvider(
       new Cesium.SingleTileImageryProvider({
-        url: this.canvas.toDataURL('image/png'),
+        url: (this.canvas as HTMLCanvasElement).toDataURL('image/png'),
         // 范围
         rectangle: this.rectangle,
         tileWidth: 256,
