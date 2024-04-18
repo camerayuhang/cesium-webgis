@@ -39,6 +39,7 @@
       <q-space />
     </q-bar>
     <vc-viewer
+      class="relative-position"
       :animation="animation"
       :base-layer-picker="baseLayerPicker"
       :timeline="timeline"
@@ -68,6 +69,7 @@
         </vc-entity> -->
 
       <WindMap :windData="windData" v-if="visualizationOptionsStore.overlayWindMap"></WindMap>
+      <new-place-mark-panel v-if="!loading"></new-place-mark-panel>
 
       <!-- Cesium Imagery -->
       <vc-layer-imagery>
@@ -91,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { VcPosition, VcCompassEvt, VcZoomEvt, VcPickEvent } from 'vue-cesium/es/utils/types';
+import { VcCompassEvt, VcZoomEvt } from 'vue-cesium/es/utils/types';
 
 import { ref, watch } from 'vue';
 import { loadNetCDF } from 'src/tools/utils';
@@ -100,10 +102,14 @@ import WindMap from 'src/components/WindMap.vue';
 import TabMenuCom from 'src/components/widgets/TabMenuCom.vue';
 import PanoramicMapCom from 'src/components/widgets/PanoramicMapCom.vue';
 import { useVisualizationOptionsStore } from 'src/stores/VisualizationOptionsStore';
+
 import PanoramicMapComVue from 'src/components/widgets/PanoramicMapCom.vue';
 
+import NewPlaceMarkPanel from 'src/components/widgets/VisualizationOptions/AddPlaceMarkOption/NewPlaceMarkPanel.vue';
+
+
 const loading = ref(true);
-const animation = ref(false);
+const animation = ref(true);
 const timeline = ref(true);
 const baseLayerPicker = ref(true);
 const fullscreenButton = ref(false);
@@ -123,17 +129,17 @@ const otherOpts = ref({
   position: 'bottom-right',
 });
 
-const point = ref({
-  pixelSize: 28,
-  color: 'red',
-});
+// const point = ref({
+//   pixelSize: 28,
+//   color: 'red',
+// });
 
-const position = ref({ lng: 108, lat: 32 } as VcPosition);
+// const position = ref({ lng: 108, lat: 32 } as VcPosition);
 
-const label = ref({
-  text: 'Hello World',
-  pixelOffset: [0, 150],
-});
+// const label = ref({
+//   text: 'Hello World',
+//   pixelOffset: [0, 150],
+// });
 
 watch(timeline, (val) => {
   otherOpts.value.offset = val ? [0, 30] : fullscreenButton.value ? [30, 5] : [0, 5];
@@ -150,9 +156,9 @@ watch(fullscreenButton, (val) => {
 const onNavigationEvt = (e: VcCompassEvt | VcZoomEvt) => {
   console.log(e);
 };
-const onEntityClick = (e: VcPickEvent) => {
-  console.log(e);
-};
+// const onEntityClick = (e: VcPickEvent) => {
+//   console.log(e);
+// };
 
 const ready = () => {
   // window.vm = this;
