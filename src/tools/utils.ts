@@ -87,4 +87,11 @@ const imageToUrl = (file: File) => {
   const objectURL = URL.createObjectURL(file);
   return objectURL;
 };
-export { loadNetCDF, imageToUrl };
+
+const getMediaDimension = (media: HTMLImageElement | HTMLVideoElement) => {
+  const width = media instanceof HTMLImageElement ? media.naturalWidth : media.videoWidth;
+  const height = media instanceof HTMLImageElement ? media.naturalHeight : media.videoHeight;
+  return { width, height };
+};
+
+export { loadNetCDF, imageToUrl, getMediaDimension };

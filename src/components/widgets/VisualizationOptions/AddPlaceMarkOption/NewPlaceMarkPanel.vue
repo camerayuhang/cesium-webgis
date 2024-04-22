@@ -2,8 +2,8 @@
   <q-card
     class="placemark-panel absolute-center z-top"
     :style="{
-      top: placemarkStore.position.top + 'px',
-      left: placemarkStore.position.left + 'px',
+      top: placemarkStore.placemarkForm.canvasPositionY as number - 60 + 'px',
+      left: placemarkStore.placemarkForm.canvasPositionX as number + 180 + 'px',
       minWidth: 300 + 'px',
       maxHeight: 60 + 'vh',
     }"
@@ -15,11 +15,13 @@
       <q-btn icon="close" flat round dense v-close-popup @click="cancelHandler" />
     </q-card-section>
     <q-card-section>
-      <q-input v-model="placemarkStore.currentPlacemark.id" label="id" dense disable />
-      <q-input v-model="placemarkStore.currentPlacemark.name" label="name" dense />
-      <q-input v-model="placemarkStore.currentPlacemark.latitude" label="latitude" dense disable />
-      <q-input v-model="placemarkStore.currentPlacemark.longitude" label="longitude" dense disable />
-      <q-input v-model="placemarkStore.currentPlacemark.description" label="description" dense type="textarea" />
+      <q-input v-model="placemarkStore.placemarkForm.id" label="id" dense disable />
+      <q-input v-model="placemarkStore.placemarkForm.name" label="name" dense />
+      <q-input v-model="placemarkStore.placemarkForm.latitude" label="latitude" dense disable />
+      <q-input v-model="placemarkStore.placemarkForm.longitude" label="longitude" dense disable />
+      <q-input v-model="placemarkStore.placemarkForm.description" label="description" dense type="textarea">
+        <template v-slot:label> <q-icon name="edit_note" />description</template>
+      </q-input>
     </q-card-section>
     <q-card-section>
       <q-file
@@ -38,14 +40,19 @@
       >
         <template v-slot:file="{ file }">{{ file.name }} </template>
         <template v-slot:prepend>
-          <q-icon name="attachment" />
+          <q-icon name="image" />
+        </template>
+        <template v-slot:append>
+          <q-icon name="delete_forever" color="warning" @click.stop.prevent="clearImg" class="cursor-pointer" />
         </template>
       </q-file>
+
       <q-img
         dense
-        v-if="placemarkStore.currentPlacemark.url !== null"
-        :src="placemarkStore.currentPlacemark.url"
+        v-if="placemarkStore.placemarkForm.imageUrl !== null"
+        :src="placemarkStore.placemarkForm.imageUrl"
         :ratio="1"
+        ref="qImgRef"
         class="q-mt-md"
         placeholder-src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWBAMAAADOL2zRAAAAG1BMVEXMzMyWlpaqqqq3t7fFxcW+vr6xsbGjo6OcnJyLKnDGAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABAElEQVRoge3SMW+DMBiE4YsxJqMJtHOTITPeOsLQnaodGImEUMZEkZhRUqn92f0MaTubtfeMh/QGHANEREREREREREREtIJJ0xbH299kp8l8FaGtLdTQ19HjofxZlJ0m1+eBKZcikd9PWtXC5DoDotRO04B9YOvFIXmXLy2jEbiqE6Df7DTleA5socLqvEFVxtJyrpZFWz/pHM2CVte0lS8g2eDe6prOyqPglhzROL+Xye4tmT4WvRcQ2/m81p+/rdguOi8Hc5L/8Qk4vhZzy08DduGt9eVQyP2qoTM1zi0/uf4hvBWf5c77e69Gf798y08L7j0RERERERERERH9P99ZpSVRivB/rgAAAABJRU5ErkJggg=="
         fit="contain"
@@ -66,24 +73,45 @@
 
 <script setup lang="ts">
 import { usePlacemarkStore } from 'src/stores/PlacemarkStore';
-import { imageToUrl } from 'src/tools/utils';
+import { getMediaDimension, imageToUrl } from 'src/tools/utils';
+import { Placemark } from 'src/types/PlacemarkService/Placemark';
 import { ref } from 'vue';
+import { useVueCesium } from 'vue-cesium';
 
+const viewer = useVueCesium().viewer;
 const placemarkStore = usePlacemarkStore();
 
 const fileRef = ref<File | null>(null);
-
+const qImgRef = ref();
 const fileSelectedHandler = (file: File) => {
-  placemarkStore.currentPlacemark.url = imageToUrl(file);
+  console.log(file);
+
+  placemarkStore.placemarkForm.imageUrl = imageToUrl(file);
 };
 
 const savePlacemarkInfo = () => {
-  placemarkStore.updatePlacemarkArray(placemarkStore.currentPlacemark.id);
+  const id = placemarkStore.placemarkForm.id;
+  const placemark = viewer.entities.getById(id) as Placemark;
+  const imgElement = qImgRef.value.$el.querySelector('img') as HTMLImageElement;
+  const { width, height } = getMediaDimension(imgElement);
+  const billboard = placemark.billboard as Cesium.BillboardGraphics;
+
+  (placemark.label as Cesium.LabelGraphics).text = new Cesium.ConstantProperty(placemarkStore.placemarkForm.name);
+  billboard.image = new Cesium.ConstantProperty(placemarkStore.placemarkForm.imageUrl);
+  billboard.width = new Cesium.ConstantProperty((100 * width) / height);
+  billboard.height = new Cesium.ConstantProperty(100);
+  placemarkStore.updatePlacemarkArray(placemarkStore.placemarkForm.id);
   cancelHandler();
+};
+
+const clearImg = () => {
+  fileRef.value = null;
+  placemarkStore.placemarkForm.imageUrl = undefined;
 };
 
 const cancelHandler = () => {
   placemarkStore.visible = false;
+  fileRef.value = null;
 };
 </script>
 

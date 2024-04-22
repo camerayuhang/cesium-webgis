@@ -15,6 +15,7 @@
 
     <q-item-label header class="text-h6">Tools</q-item-label>
     <add-place-mark-option-com></add-place-mark-option-com>
+    <!-- <add-place-mark-option-com-old></add-place-mark-option-com-old> -->
   </q-list>
 </template>
 
@@ -24,6 +25,7 @@ import PollutionDiffusionCom from 'src/components/widgets/VisualizationOptions/P
 import VectorRenderCom from 'src/components/widgets/VisualizationOptions/VectorRender/VectorRenderCom.vue';
 
 import AddPlaceMarkOptionCom from './AddPlaceMarkOption/AddPlaceMarkOptionCom.vue';
+import AddPlaceMarkOptionComOld from './AddPlaceMarkOption/AddPlaceMarkOptionComOld.vue';
 import PhotogrammetryTileCom from './Photogrammetry/PhotogrammetryTileCom.vue';
 import WindMapOptionCom from './WindMapOption/WindMapOptionCom.vue';
 </script>
