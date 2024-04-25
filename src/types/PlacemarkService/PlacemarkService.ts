@@ -1,11 +1,14 @@
+import { createPlaceMarkInfo, getAllPlacemarks } from 'src/api/placemark_api';
 import { Placemark } from './Placemark';
-import { PlacemarkInfo } from './PlacemarkInfo';
+import { PlacemarkInfo, PlacemarkInfoToSend } from './PlacemarkInfo';
 import mitt, { Emitter } from 'mitt';
+import { getImageDimensions, getSpatialInfo } from 'src/tools/utils';
 
 type Event = {
   'add-placemark': PlacemarkInfo;
   'placemark-panel-visibility': {
     visible: boolean;
+    placemarkInfo?: PlacemarkInfo;
     id?: string;
   };
 };
@@ -19,7 +22,6 @@ class PlacemarkService {
   movingPlacemark: Placemark;
   placemarkInfoArray: PlacemarkInfo[];
   emitter: Emitter<Event>;
-  // store:Store
 
   constructor(viewer: Cesium.Viewer, placemarkInfoArray: PlacemarkInfo[]) {
     this.viewer = viewer;
@@ -29,6 +31,7 @@ class PlacemarkService {
     this.selectedPlacemark = null;
     this.movingPlacemark = this.createPlaceMark();
     this.viewer.entities.add(this.movingPlacemark);
+
     this.placemarkInfoArray = placemarkInfoArray;
     this.emitter = mitt<Event>();
     // this.store = usePlacemarkStore()
@@ -49,16 +52,17 @@ class PlacemarkService {
 
   setPlacemarkAddedAction() {
     // entity that is fixed to a location when mouse clicks
-    this.handler.setInputAction((event: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
+    this.handler.setInputAction(async (event: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
       const cartesian = this.viewer.camera.pickEllipsoid(event.position, this.scene.globe.ellipsoid);
       if (cartesian) {
-        const fixedPlaceMark = this.createPlaceMark();
+        const fixedPlaceMark = await this.createAndSavePlaceMark(cartesian);
 
-        fixedPlaceMark.setPosition(new Cesium.ConstantPositionProperty(cartesian));
+        // fixedPlaceMark.setPosition(new Cesium.ConstantPositionProperty(cartesian));
 
+        // await this.savePlacemarkInfoForm(fixedPlaceMark.info);
         this.viewer.entities.add(fixedPlaceMark);
 
-        this.placemarkInfoArray.push(fixedPlaceMark.info);
+        // this.placemarkInfoArray.push(fixedPlaceMark.info as PlacemarkInfo);
         this.showNewPlacemarkPanel(fixedPlaceMark, false);
         this.movingPlacemark.position = undefined;
 
@@ -93,29 +97,94 @@ class PlacemarkService {
     }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
   }
 
-  createPlaceMark() {
-    const placemark = new Placemark({
-      point: {
-        outlineColor: Cesium.Color.WHITE,
-        outlineWidth: 2,
-      },
-      label: {
-        show: true,
-        // text: 'New Placemark',
-        font: '14px Microsoft Yahei',
-        fillColor: Cesium.Color.WHITE,
-        outlineColor: Cesium.Color.BLACK,
-        // verticalOrigin: Cesium.VerticalOrigin.TOP,
-        pixelOffset: new Cesium.Cartesian2(0, 20),
-      },
-      billboard: {
-        show: true,
-        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-        pixelOffset: new Cesium.Cartesian2(0, -10),
-      },
-    });
-    placemark.setDefaultStyle();
+  async createAllPlacemarks() {
+    const placemarkInfoArray = await getAllPlacemarks();
 
+    placemarkInfoArray.forEach(async (placemarkInfo) => {
+      const placemark = this.createPlaceMark(placemarkInfo);
+      await placemark.updateInfoInCesium();
+      this.viewer.entities.add(placemark);
+    });
+  }
+
+  async removeAllPlacemarks() {
+    const entitieArray = Array.from(this.viewer.entities.values);
+
+    entitieArray.forEach((entity) => {
+      if (entity instanceof Placemark) {
+        this.viewer.entities.remove(entity);
+      }
+    });
+    // clean events
+    this.removeScreenSpaceEvent();
+  }
+
+  async createAndSavePlaceMark(cartesian: Cesium.Cartesian3) {
+    // let placemarkInfo: PlacemarkInfo = {
+    //   id: '',
+    //   name: '',
+    //   description: '',
+    //   longitude: 0,
+    //   latitude: 0,
+    //   height: 0,
+    //   cartesian_x: 0,
+    //   cartesian_y: 0,
+    //   cartesian_z: 0,
+    // };
+
+    const placemarkInfoForm: PlacemarkInfoToSend = getSpatialInfo(cartesian);
+    const placemarkInfo = await createPlaceMarkInfo(placemarkInfoForm);
+
+    const placemark = this.createPlaceMark(placemarkInfo);
+
+    return placemark;
+  }
+
+  createPlaceMark(
+    placemarkInfo: PlacemarkInfo = {
+      id: '',
+      name: '',
+      description: '',
+      longitude: 0,
+      latitude: 0,
+      height: 0,
+      cartesian_x: 0,
+      cartesian_y: 0,
+      cartesian_z: 0,
+    }
+  ) {
+    const placemark = new Placemark(
+      {
+        id: placemarkInfo.id,
+        point: {
+          outlineColor: Cesium.Color.WHITE,
+          outlineWidth: 2,
+        },
+        label: {
+          show: true,
+          // text: 'New Placemark',
+          font: '14px Microsoft Yahei',
+          fillColor: Cesium.Color.WHITE,
+          outlineColor: Cesium.Color.BLACK,
+          // verticalOrigin: Cesium.VerticalOrigin.TOP,
+          pixelOffset: new Cesium.Cartesian2(0, 20),
+          text: placemarkInfo.name,
+        },
+        billboard: {
+          show: true,
+          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+          pixelOffset: new Cesium.Cartesian2(0, -10),
+        },
+        position: new Cesium.Cartesian3(
+          placemarkInfo.cartesian_x,
+          placemarkInfo.cartesian_y,
+          placemarkInfo.cartesian_z
+        ),
+      },
+      placemarkInfo
+    );
+
+    placemark.setDefaultStyle();
     return placemark;
   }
 
@@ -135,14 +204,15 @@ class PlacemarkService {
     const position = placemark.position?.getValue(this.viewer.clock.currentTime) as Cesium.Cartesian3;
     const canvasPosition = Cesium.SceneTransforms.wgs84ToWindowCoordinates(this.scene, position);
 
-    placemark.info.canvasPositionX = canvasPosition.x;
-    placemark.info.canvasPositionY = canvasPosition.y;
+    (placemark.info as PlacemarkInfo).canvasPositionX = canvasPosition.x;
+    (placemark.info as PlacemarkInfo).canvasPositionY = canvasPosition.y;
     if (isHighlighted) {
       placemark.setHighlightStyle();
     }
 
     this.emitter.emit('placemark-panel-visibility', {
       visible: true,
+      placemarkInfo: placemark.info,
       id: placemark.id,
     });
   }

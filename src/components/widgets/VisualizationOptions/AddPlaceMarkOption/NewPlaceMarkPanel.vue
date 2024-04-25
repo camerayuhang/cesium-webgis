@@ -1,11 +1,12 @@
 <template>
   <q-card
-    class="placemark-panel absolute-center z-top"
+    class="placemark-panel absolute-center"
     :style="{
       top: placemarkStore.placemarkForm.canvasPositionY as number - 60 + 'px',
       left: placemarkStore.placemarkForm.canvasPositionX as number + 180 + 'px',
       minWidth: 300 + 'px',
       maxHeight: 60 + 'vh',
+      zIndex: 3000
     }"
     v-show="placemarkStore.visible"
   >
@@ -27,7 +28,7 @@
       <q-file
         dense
         filled
-        v-model="fileRef"
+        v-model="placemarkStore.placemarkForm.file"
         label="image"
         @update:model-value="fileSelectedHandler"
         accept=".jpg, image/*"
@@ -49,8 +50,7 @@
 
       <q-img
         dense
-        v-if="placemarkStore.placemarkForm.imageUrl !== null"
-        :src="placemarkStore.placemarkForm.imageUrl"
+        :src="placemarkStore.image_url"
         :ratio="1"
         ref="qImgRef"
         class="q-mt-md"
@@ -72,46 +72,73 @@
 </template>
 
 <script setup lang="ts">
+import { deletePlacemarkImageById, updatePlacemarkInfoById } from 'src/api/placemark_api';
 import { usePlacemarkStore } from 'src/stores/PlacemarkStore';
 import { getMediaDimension, imageToUrl } from 'src/tools/utils';
 import { Placemark } from 'src/types/PlacemarkService/Placemark';
+import { PlacemarkInfo } from 'src/types/PlacemarkService/PlacemarkInfo';
 import { ref } from 'vue';
 import { useVueCesium } from 'vue-cesium';
 
 const viewer = useVueCesium().viewer;
 const placemarkStore = usePlacemarkStore();
 
-const fileRef = ref<File | null>(null);
+// const fileRef = ref<File | null>(null);
 const qImgRef = ref();
 const fileSelectedHandler = (file: File) => {
-  console.log(file);
-
-  placemarkStore.placemarkForm.imageUrl = imageToUrl(file);
+  placemarkStore.image_url = imageToUrl(file);
 };
 
-const savePlacemarkInfo = () => {
-  const id = placemarkStore.placemarkForm.id;
+const savePlacemarkInfo = async () => {
+  const id = placemarkStore.placemarkForm.id as string;
   const placemark = viewer.entities.getById(id) as Placemark;
-  const imgElement = qImgRef.value.$el.querySelector('img') as HTMLImageElement;
-  const { width, height } = getMediaDimension(imgElement);
-  const billboard = placemark.billboard as Cesium.BillboardGraphics;
-
-  (placemark.label as Cesium.LabelGraphics).text = new Cesium.ConstantProperty(placemarkStore.placemarkForm.name);
-  billboard.image = new Cesium.ConstantProperty(placemarkStore.placemarkForm.imageUrl);
-  billboard.width = new Cesium.ConstantProperty((100 * width) / height);
-  billboard.height = new Cesium.ConstantProperty(100);
-  placemarkStore.updatePlacemarkArray(placemarkStore.placemarkForm.id);
+  // const imgElement = qImgRef.value.$el.querySelector('img') as HTMLImageElement;
+  // const { width, height } = getMediaDimension(imgElement);
+  const propsToUpdate = {
+    name: placemarkStore.placemarkForm.name,
+    description: placemarkStore.placemarkForm.description,
+    file: placemarkStore.placemarkForm.file,
+  };
+  await placemark.update(propsToUpdate);
+  placemarkStore.image_url = placemark.info.placemark_image?.image;
   cancelHandler();
+
+  // update placemark
+  // const billboard = placemark.billboard as Cesium.BillboardGraphics;
+  // (placemark.label as Cesium.LabelGraphics).text = new Cesium.ConstantProperty(placemarkStore.placemarkForm.name);
+  // billboard.image = new Cesium.ConstantProperty(placemarkStore.placemarkForm.image_url);
+  // billboard.width = new Cesium.ConstantProperty((100 * width) / height);
+  // billboard.height = new Cesium.ConstantProperty(100);
+
+  // update placemarkinfo stored in placemark
+  // (placemark.info as PlacemarkInfo).name = placemarkStore.placemarkForm.name;
+  // (placemark.info as PlacemarkInfo).description = placemarkStore.placemarkForm.description;
+  // (placemark.info as PlacemarkInfo).image_url = placemarkStore.placemarkForm.image_url;
+
+  // // update placemarkinfo on postgresql
+  // updatePlacemarkInfoById(id, {
+  //   name: placemarkStore.placemarkForm.name,
+  //   description: placemarkStore.placemarkForm.description,
+  //   image_url: placemarkStore.placemarkForm.image_url,
+  // });
+
+  // placemarkStore.updatePlacemarkArray(placemarkStore.placemarkForm.id);
 };
 
-const clearImg = () => {
-  fileRef.value = null;
-  placemarkStore.placemarkForm.imageUrl = undefined;
+const clearImg = async () => {
+  if (placemarkStore.placemarkForm.placemark_image) {
+    const placemarkId = placemarkStore.placemarkForm.id as string;
+    const placemark = viewer.entities.getById(placemarkId) as Placemark;
+    await placemark.clearPlacemarkImage();
+
+    placemarkStore.placemarkForm.file = undefined;
+    placemarkStore.image_url = undefined;
+  }
 };
 
 const cancelHandler = () => {
   placemarkStore.visible = false;
-  fileRef.value = null;
+  placemarkStore.placemarkForm.file = undefined;
 };
 </script>
 

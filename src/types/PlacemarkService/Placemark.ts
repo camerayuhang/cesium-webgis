@@ -1,4 +1,6 @@
-import { PlacemarkInfo } from './PlacemarkInfo';
+import { createImgSrc, getImageDimensions } from 'src/tools/utils';
+import { PlacemarkInfo, PlacemarkInfoToSend } from './PlacemarkInfo';
+import { deletePlacemarkImageById, updatePlacemarkInfoById } from 'src/api/placemark_api';
 
 interface RequiredPointGraphicsOptions extends Cesium.Entity.ConstructorOptions {
   point: Cesium.PointGraphics | Cesium.PointGraphics.ConstructorOptions;
@@ -7,20 +9,9 @@ interface RequiredPointGraphicsOptions extends Cesium.Entity.ConstructorOptions 
 class Placemark extends Cesium.Entity {
   info: PlacemarkInfo;
 
-  constructor(options: RequiredPointGraphicsOptions) {
+  constructor(options: RequiredPointGraphicsOptions, info: PlacemarkInfo) {
     super(options);
-    this.info = {
-      id: this.id,
-      longitude: this.getLonLat()?.longitude,
-      latitude: this.getLonLat()?.latitude,
-    };
-  }
-
-  setPosition(position: Cesium.PositionProperty) {
-    this.position = position;
-    const { longitude, latitude } = this.getLonLat();
-    this.info.latitude = latitude;
-    this.info.longitude = longitude;
+    this.info = info;
   }
 
   setDefaultStyle() {
@@ -33,6 +24,39 @@ class Placemark extends Cesium.Entity {
     (this.point as Cesium.PointGraphics).pixelSize = new Cesium.ConstantProperty(20);
   }
 
+  async update(propsToUpdate: PlacemarkInfoToSend) {
+    await this.updateInfo(propsToUpdate);
+    await this.updateInfoInCesium();
+  }
+
+  async updateInfoInCesium() {
+    // update placemark
+    (this.label as Cesium.LabelGraphics).text = new Cesium.ConstantProperty(this.info.name);
+    const billboard = this.billboard as Cesium.BillboardGraphics;
+    if (this.info.placemark_image) {
+      const placemark_image = this.info.placemark_image;
+      const imgSrc = createImgSrc(placemark_image.image, placemark_image.type);
+      const { width, height } = await getImageDimensions(imgSrc);
+      billboard.image = new Cesium.ConstantProperty(imgSrc);
+      billboard.width = new Cesium.ConstantProperty((100 * width) / height);
+      billboard.height = new Cesium.ConstantProperty(100);
+    } else {
+      billboard.image = undefined;
+    }
+  }
+
+  async clearPlacemarkImage() {
+    await deletePlacemarkImageById(this.id);
+    this.info.placemark_image = undefined;
+    (this.billboard as Cesium.BillboardGraphics).image = undefined;
+  }
+
+  async updateInfo(propsToUpdate: PlacemarkInfoToSend) {
+    const placemarkInfo = await updatePlacemarkInfoById(this.info.id, propsToUpdate);
+
+    this.info = placemarkInfo;
+  }
+
   getLonLat() {
     if (this.position) {
       const cartesian = this.position.getValue(new Cesium.JulianDate()) as Cesium.Cartesian3;
@@ -40,10 +64,25 @@ class Placemark extends Cesium.Entity {
       const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
       const longitude = Cesium.Math.toDegrees(cartographic.longitude);
       const latitude = Cesium.Math.toDegrees(cartographic.latitude);
+      const height = cartographic.height;
 
-      return { longitude, latitude };
+      return {
+        longitude,
+        latitude,
+        height,
+        cartesian_x: cartesian.x,
+        cartesian_y: cartesian.y,
+        cartesian_z: cartesian.z,
+      };
     } else {
-      return { longitude: undefined, latitude: undefined };
+      return {
+        longitude: undefined,
+        latitude: undefined,
+        height: undefined,
+        cartesian_x: undefined,
+        cartesian_y: undefined,
+        cartesian_z: undefined,
+      };
     }
   }
 }

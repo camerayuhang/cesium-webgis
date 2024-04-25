@@ -14,8 +14,8 @@
     <photogrammetry-tile-com></photogrammetry-tile-com>
 
     <q-item-label header class="text-h6">Tools</q-item-label>
+
     <add-place-mark-option-com></add-place-mark-option-com>
-    <!-- <add-place-mark-option-com-old></add-place-mark-option-com-old> -->
   </q-list>
 </template>
 
