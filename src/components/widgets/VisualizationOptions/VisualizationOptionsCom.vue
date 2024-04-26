@@ -25,7 +25,6 @@ import PollutionDiffusionCom from 'src/components/widgets/VisualizationOptions/P
 import VectorRenderCom from 'src/components/widgets/VisualizationOptions/VectorRender/VectorRenderCom.vue';
 
 import AddPlaceMarkOptionCom from './AddPlaceMarkOption/AddPlaceMarkOptionCom.vue';
-import AddPlaceMarkOptionComOld from './AddPlaceMarkOption/AddPlaceMarkOptionComOld.vue';
 import PhotogrammetryTileCom from './Photogrammetry/PhotogrammetryTileCom.vue';
 import WindMapOptionCom from './WindMapOption/WindMapOptionCom.vue';
 </script>

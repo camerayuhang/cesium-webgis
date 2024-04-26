@@ -4,8 +4,6 @@
     :style="{
       top: placemarkStore.placemarkForm.canvasPositionY as number - 60 + 'px',
       left: placemarkStore.placemarkForm.canvasPositionX as number + 180 + 'px',
-      minWidth: 300 + 'px',
-      maxHeight: 60 + 'vh',
       zIndex: 3000
     }"
     v-show="placemarkStore.visible"
@@ -15,58 +13,57 @@
       <q-space />
       <q-btn icon="close" flat round dense v-close-popup @click="cancelHandler" />
     </q-card-section>
-    <q-card-section>
-      <q-input v-model="placemarkStore.placemarkForm.id" label="id" dense disable />
-      <q-input v-model="placemarkStore.placemarkForm.name" label="name" dense />
-      <q-input v-model="placemarkStore.placemarkForm.latitude" label="latitude" dense disable />
-      <q-input v-model="placemarkStore.placemarkForm.longitude" label="longitude" dense disable />
-      <q-input v-model="placemarkStore.placemarkForm.description" label="description" dense type="textarea">
-        <template v-slot:label> <q-icon name="edit_note" />description</template>
-      </q-input>
-    </q-card-section>
-    <q-card-section>
-      <q-file
-        dense
-        filled
-        v-model="placemarkStore.placemarkForm.file"
-        label="image"
-        @update:model-value="fileSelectedHandler"
-        accept=".jpg, image/*"
-        :rules="[
-          (val) => {
-            return val != null || 'File is required';
-          },
-        ]"
-        lazy-rules="ondemand"
-      >
-        <template v-slot:file="{ file }">{{ file.name }} </template>
-        <template v-slot:prepend>
-          <q-icon name="image" />
-        </template>
-        <template v-slot:append>
-          <q-icon name="delete_forever" color="warning" @click.stop.prevent="clearImg" class="cursor-pointer" />
-        </template>
-      </q-file>
-
-      <q-img
-        dense
-        :src="placemarkStore.image_url"
-        :ratio="1"
-        ref="qImgRef"
-        class="q-mt-md"
-        placeholder-src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWBAMAAADOL2zRAAAAG1BMVEXMzMyWlpaqqqq3t7fFxcW+vr6xsbGjo6OcnJyLKnDGAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABAElEQVRoge3SMW+DMBiE4YsxJqMJtHOTITPeOsLQnaodGImEUMZEkZhRUqn92f0MaTubtfeMh/QGHANEREREREREREREtIJJ0xbH299kp8l8FaGtLdTQ19HjofxZlJ0m1+eBKZcikd9PWtXC5DoDotRO04B9YOvFIXmXLy2jEbiqE6Df7DTleA5socLqvEFVxtJyrpZFWz/pHM2CVte0lS8g2eDe6prOyqPglhzROL+Xye4tmT4WvRcQ2/m81p+/rdguOi8Hc5L/8Qk4vhZzy08DduGt9eVQyP2qoTM1zi0/uf4hvBWf5c77e69Gf798y08L7j0RERERERERERH9P99ZpSVRivB/rgAAAABJRU5ErkJggg=="
-        fit="contain"
-      />
-    </q-card-section>
+    <div class="content" :style="{ minWidth: 300 + 'px', maxHeight: 55 + 'vh' }">
+      <q-card-section>
+        <!-- <q-input v-model="placemarkStore.placemarkForm.id" label="id" dense disable /> -->
+        <q-input v-model="placemarkStore.placemarkForm.name" label="name" dense />
+        <q-input v-model="placemarkStore.placemarkForm.latitude" label="latitude" dense disable />
+        <q-input v-model="placemarkStore.placemarkForm.longitude" label="longitude" dense disable />
+        <q-input v-model="placemarkStore.placemarkForm.description" label="description" dense type="textarea">
+          <template v-slot:label> <q-icon name="edit_note" />description</template>
+        </q-input>
+      </q-card-section>
+      <q-card-section>
+        <q-file
+          dense
+          filled
+          v-model="placemarkStore.placemarkForm.file"
+          label="image"
+          @update:model-value="fileSelectedHandler"
+          accept=".jpg, image/*"
+          :rules="[
+            (val) => {
+              return val != null || 'File is required';
+            },
+          ]"
+          lazy-rules="ondemand"
+        >
+          <template v-slot:file="{ file }">{{ file.name }} </template>
+          <template v-slot:prepend>
+            <q-icon name="image" />
+          </template>
+          <template v-slot:append>
+            <q-icon name="delete_forever" color="warning" @click.stop.prevent="clearImg" class="cursor-pointer" />
+          </template>
+        </q-file>
+        <q-img
+          dense
+          :src="placemarkStore.image_url"
+          :ratio="1"
+          ref="qImgRef"
+          spinner-color="red"
+          placeholder-src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWBAMAAADOL2zRAAAAG1BMVEXMzMyWlpaqqqq3t7fFxcW+vr6xsbGjo6OcnJyLKnDGAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABAElEQVRoge3SMW+DMBiE4YsxJqMJtHOTITPeOsLQnaodGImEUMZEkZhRUqn92f0MaTubtfeMh/QGHANEREREREREREREtIJJ0xbH299kp8l8FaGtLdTQ19HjofxZlJ0m1+eBKZcikd9PWtXC5DoDotRO04B9YOvFIXmXLy2jEbiqE6Df7DTleA5socLqvEFVxtJyrpZFWz/pHM2CVte0lS8g2eDe6prOyqPglhzROL+Xye4tmT4WvRcQ2/m81p+/rdguOi8Hc5L/8Qk4vhZzy08DduGt9eVQyP2qoTM1zi0/uf4hvBWf5c77e69Gf798y08L7j0RERERERERERH9P99ZpSVRivB/rgAAAABJRU5ErkJggg=="
+          fit="contain"
+          style="max-height: min-content; height: 100%"
+        />
+      </q-card-section>
+    </div>
 
     <q-card-section class="row justify-end q-gutter-md no-wrap">
-      <q-btn dark-percentage unelevated color="orange" text-color="grey-9" @click="savePlacemarkInfo">
-        <div>OK</div></q-btn
-      >
-
-      <q-btn color="negative" @click="cancelHandler">
-        <div>Cancel</div>
+      <q-btn dark-percentage unelevated color="orange" text-color="grey-9" @click="savePlacemarkInfo" icon="done">
       </q-btn>
+
+      <q-btn color="negative" @click="deleteHandler" icon="delete"> </q-btn>
     </q-card-section>
   </q-card>
 </template>
@@ -140,10 +137,18 @@ const cancelHandler = () => {
   placemarkStore.visible = false;
   placemarkStore.placemarkForm.file = undefined;
 };
+
+const deleteHandler = async () => {
+  const id = placemarkStore.placemarkForm.id as string;
+  const placemark = viewer.entities.getById(id) as Placemark;
+  await placemark.deleteInfo();
+  viewer.entities.removeById(id);
+  cancelHandler();
+};
 </script>
 
 <style lang="scss" scoped>
-.placemark-panel {
+.placemark-panel .content {
   overflow: scroll;
 }
 </style>

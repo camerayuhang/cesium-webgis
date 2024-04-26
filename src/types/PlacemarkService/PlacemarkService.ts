@@ -20,10 +20,9 @@ class PlacemarkService {
   handler: Cesium.ScreenSpaceEventHandler;
   selectedPlacemark: Placemark | null;
   movingPlacemark: Placemark;
-  placemarkInfoArray: PlacemarkInfo[];
   emitter: Emitter<Event>;
 
-  constructor(viewer: Cesium.Viewer, placemarkInfoArray: PlacemarkInfo[]) {
+  constructor(viewer: Cesium.Viewer) {
     this.viewer = viewer;
     this.scene = viewer.scene;
     this.canvas = this.scene.canvas;
@@ -32,7 +31,6 @@ class PlacemarkService {
     this.movingPlacemark = this.createPlaceMark();
     this.viewer.entities.add(this.movingPlacemark);
 
-    this.placemarkInfoArray = placemarkInfoArray;
     this.emitter = mitt<Event>();
     // this.store = usePlacemarkStore()
   }
@@ -142,7 +140,7 @@ class PlacemarkService {
 
   createPlaceMark(
     placemarkInfo: PlacemarkInfo = {
-      id: '',
+      id: '-1',
       name: '',
       description: '',
       longitude: 0,

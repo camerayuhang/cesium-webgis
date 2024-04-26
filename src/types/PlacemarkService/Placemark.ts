@@ -1,6 +1,6 @@
 import { createImgSrc, getImageDimensions } from 'src/tools/utils';
 import { PlacemarkInfo, PlacemarkInfoToSend } from './PlacemarkInfo';
-import { deletePlacemarkImageById, updatePlacemarkInfoById } from 'src/api/placemark_api';
+import { deletePlacemarkById, deletePlacemarkImageById, updatePlacemarkInfoById } from 'src/api/placemark_api';
 
 interface RequiredPointGraphicsOptions extends Cesium.Entity.ConstructorOptions {
   point: Cesium.PointGraphics | Cesium.PointGraphics.ConstructorOptions;
@@ -55,6 +55,10 @@ class Placemark extends Cesium.Entity {
     const placemarkInfo = await updatePlacemarkInfoById(this.info.id, propsToUpdate);
 
     this.info = placemarkInfo;
+  }
+
+  async deleteInfo() {
+    await deletePlacemarkById(this.info.id);
   }
 
   getLonLat() {

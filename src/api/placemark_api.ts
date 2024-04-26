@@ -10,6 +10,10 @@ const getAllPlacemarks = async (): Promise<PlacemarkInfo[]> => {
   const { data } = await placemarkAPI.get('/placemarkinfo');
   if (!data) return new Array<PlacemarkInfo>(0);
   Loading.hide();
+  Notify.create({
+    message: 'Loading all placemarks successfully!',
+    type: 'positive',
+  });
   return data;
 };
 
@@ -42,6 +46,40 @@ const updatePlacemarkInfoById = async (id: string, form: Partial<PlacemarkInfo>)
   return response.data;
 };
 
+const deletePlacemarkById = (id: string) => {
+  return new Promise((resolve, reject) => {
+    Dialog.create({ class: 'z-max', title: 'Confirm', message: 'Are you sure to delete this placemark?' }).onOk(
+      async () => {
+        try {
+          const response = await placemarkAPI.delete(`/placemarkinfo/${id}`);
+          if (response.status === HttpStatus.OK) {
+            resolve(
+              Notify.create({
+                message: response.data,
+                type: 'info',
+              })
+            );
+          } else if (response.status === HttpStatus.INTERNAL_SERVER_ERROR) {
+            resolve(
+              Notify.create({
+                message: 'server error',
+                type: 'negative',
+              })
+            );
+          }
+        } catch (error) {
+          reject(
+            Notify.create({
+              message: error as string,
+              type: 'negative',
+            })
+          );
+        }
+      }
+    );
+  });
+};
+
 const deletePlacemarkImageById = (placemarkId: string) => {
   return new Promise((resolve, reject) => {
     Dialog.create({ class: 'z-max', title: 'Confirm', message: 'Are you sure to delete this image?' }).onOk(
@@ -58,7 +96,7 @@ const deletePlacemarkImageById = (placemarkId: string) => {
           } else if (response.status === HttpStatus.NOT_FOUND) {
             resolve(
               Notify.create({
-                message: response.data,
+                message: 'server error',
                 type: 'negative',
               })
             );
@@ -111,4 +149,11 @@ function objectToFormData(obj: any): FormData {
   return formData;
 }
 
-export { getAllPlacemarks, getPlacemarkById, createPlaceMarkInfo, updatePlacemarkInfoById, deletePlacemarkImageById };
+export {
+  getAllPlacemarks,
+  getPlacemarkById,
+  createPlaceMarkInfo,
+  updatePlacemarkInfoById,
+  deletePlacemarkImageById,
+  deletePlacemarkById,
+};

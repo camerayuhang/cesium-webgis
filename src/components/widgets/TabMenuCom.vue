@@ -16,7 +16,7 @@
 
       <q-separator />
 
-      <q-tab-panels v-model="tab" animated>
+      <q-tab-panels v-model="tab" animated class="content">
         <q-tab-panel name="MapOptions">
           <map-options-com />
         </q-tab-panel>
@@ -38,8 +38,8 @@ const tab = ref('MapOptions');
 </script>
 
 <style lang="scss">
-.sc-widget-container {
+.sc-widget-container .content {
   height: 60vh;
-  overflow: scroll;
+  // overflow: scroll;
 }
 </style>

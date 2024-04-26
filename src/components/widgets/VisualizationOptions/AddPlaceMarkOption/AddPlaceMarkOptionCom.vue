@@ -29,20 +29,17 @@
 <script setup lang="ts">
 import { useVueCesium } from 'vue-cesium';
 import { usePlacemarkStore } from 'src/stores/PlacemarkStore';
-import { watch, ref } from 'vue';
+import { watch, ref, onMounted, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { PlacemarkService } from 'src/types/PlacemarkService/PlacemarkService';
 import { createImgSrc } from 'src/tools/utils';
-
-const placemarkStore = usePlacemarkStore();
-
 const loading = ref(false);
 const enableAddPlacemark = ref(false);
-
+const placemarkStore = usePlacemarkStore();
 const vcViewer = useVueCesium();
 const viewer = vcViewer.viewer;
 
-const placemarkService = new PlacemarkService(viewer, placemarkStore.placemarkArray);
+const placemarkService = new PlacemarkService(viewer);
 
 placemarkService.emitter.on('placemark-panel-visibility', (e) => {
   if (e.placemarkInfo) {
@@ -87,6 +84,12 @@ watch(visible, () => {
     placemarkService.setPlacemarkSelectedAction();
     placemarkService.setCursorPointerAction();
     placemarkService.selectedPlacemark?.setDefaultStyle();
+  }
+});
+
+onUnmounted(() => {
+  if (placemarkService.movingPlacemark) {
+    viewer.entities.remove(placemarkService.movingPlacemark);
   }
 });
 </script>
