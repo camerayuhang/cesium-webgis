@@ -1,4 +1,4 @@
-import { createImgSrc, getImageDimensions } from 'src/tools/utils';
+import { createImgSrc, getImageDimensions, getLeftTopLimitedInContainer } from 'src/tools/utils';
 import { PlacemarkInfo, PlacemarkInfoToSend } from './PlacemarkInfo';
 import { deletePlacemarkById, deletePlacemarkImageById, updatePlacemarkInfoById } from 'src/api/placemark_api';
 
@@ -8,6 +8,9 @@ interface RequiredPointGraphicsOptions extends Cesium.Entity.ConstructorOptions 
 
 class Placemark extends Cesium.Entity {
   info: PlacemarkInfo;
+  static panelInfo: PlacemarkInfoToSend;
+  static panelVisibility: boolean;
+  static canvasPosition: { x: number; y: number };
 
   constructor(options: RequiredPointGraphicsOptions, info: PlacemarkInfo) {
     super(options);
@@ -59,6 +62,32 @@ class Placemark extends Cesium.Entity {
 
   async deleteInfo() {
     await deletePlacemarkById(this.info.id);
+  }
+
+  showPanel(scene: Cesium.Scene, isHighlighted = false) {
+    Placemark.panelInfo = { ...this.info };
+    const position = this.position?.getValue(new Cesium.JulianDate()) as Cesium.Cartesian3;
+    const canvasPosition = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, position);
+    this.adjustPanelPosition(scene.canvas, canvasPosition.x, canvasPosition.y);
+    Placemark.panelVisibility = true;
+    if (isHighlighted) {
+      this.setHighlightStyle();
+    } else {
+      this.setDefaultStyle();
+    }
+  }
+
+  adjustPanelPosition(canvas: HTMLCanvasElement, left: number, top: number) {
+    const panel = canvas.closest('#cesiumContainer')?.querySelector('#placemark-panel') as HTMLDivElement;
+    // left = left + 20;
+    // top = top - panel.offsetHeight / 2;
+
+    Placemark.canvasPosition = getLeftTopLimitedInContainer(canvas, panel, left, top);
+  }
+
+  hidePanel() {
+    Placemark.panelVisibility = false;
+    this.setDefaultStyle();
   }
 
   getLonLat() {

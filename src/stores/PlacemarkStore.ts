@@ -1,10 +1,8 @@
 import { defineStore } from 'pinia';
-import { PlacemarkInfo, PlacemarkInfoToSend } from 'src/types/PlacemarkService/PlacemarkInfo';
+import { PlacemarkInfoToSend } from 'src/types/PlacemarkService/PlacemarkInfo';
 import { ref } from 'vue';
 
 export const usePlacemarkStore = defineStore('PlacemarkStore', () => {
-  const placemarkArray = ref<PlacemarkInfo[]>([]);
-
   const placemarkForm = ref<PlacemarkInfoToSend>({
     id: '',
     name: '',
@@ -16,22 +14,13 @@ export const usePlacemarkStore = defineStore('PlacemarkStore', () => {
     cartesian_x: 0,
     cartesian_y: 0,
     cartesian_z: 0,
-    canvasPositionX: 0,
-    canvasPositionY: 0,
   });
   const image_url = ref<string | undefined>('');
 
   const visible = ref(false);
+  const canvasPosition = { x: 0, y: 0 };
+  const expanded = ref(false);
   const saved = ref(false);
-
-  const setCurrentPlacemarkById = (id: string) => {
-    const placemark = placemarkArray.value.find((placemark) => placemark.id === id);
-    if (placemark) {
-      placemarkForm.value = { ...placemark };
-    } else {
-      resetCurrentPlacemark();
-    }
-  };
 
   // const updatePlacemarkArray = (id: string) => {
   //   const placemark = placemarkArray.value.find((placemark) => placemark.id === id) as PlacemarkInfo;
@@ -55,19 +44,16 @@ export const usePlacemarkStore = defineStore('PlacemarkStore', () => {
       cartesian_x: 0,
       cartesian_y: 0,
       cartesian_z: 0,
-      canvasPositionX: 0,
-      canvasPositionY: 0,
     };
     image_url.value = '';
   };
   return {
-    placemarkArray,
     image_url,
     visible,
+    canvasPosition,
     placemarkForm,
     saved,
-    setCurrentPlacemarkById,
+    expanded,
     resetCurrentPlacemark,
-    // updatePlacemarkArray,
   };
 });

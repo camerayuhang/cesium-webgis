@@ -1,5 +1,5 @@
 <template>
-  <div class="sc-widget-container q-ma-xl absolute-left z-top" style="max-width: 300px">
+  <div class="sc-widget-container" style="max-width: 30vh">
     <q-card>
       <q-tabs
         v-model="tab"
@@ -16,7 +16,7 @@
 
       <q-separator />
 
-      <q-tab-panels v-model="tab" animated class="content">
+      <q-tab-panels v-model="tab" animated class="content" :keep-alive="true">
         <q-tab-panel name="MapOptions">
           <map-options-com />
         </q-tab-panel>
@@ -38,8 +38,14 @@ const tab = ref('MapOptions');
 </script>
 
 <style lang="scss">
-.sc-widget-container .content {
-  height: 60vh;
-  // overflow: scroll;
+.sc-widget-container {
+  // background: rgba($color: #16073e, $alpha: 0.5);
+  position: absolute;
+  left: 5vh;
+  top: 2vh;
+  .content {
+    height: 60vh;
+    // overflow: scroll;
+  }
 }
 </style>

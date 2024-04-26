@@ -9,8 +9,8 @@ interface PlacemarkInfo {
   cartesian_y: number;
   cartesian_z: number;
   placemark_image?: PlacemarkImage;
-  canvasPositionX?: number;
-  canvasPositionY?: number;
+  // canvasPositionX?: number;
+  // canvasPositionY?: number;
 }
 
 interface PlacemarkImage {

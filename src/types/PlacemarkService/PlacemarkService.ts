@@ -2,13 +2,14 @@ import { createPlaceMarkInfo, getAllPlacemarks } from 'src/api/placemark_api';
 import { Placemark } from './Placemark';
 import { PlacemarkInfo, PlacemarkInfoToSend } from './PlacemarkInfo';
 import mitt, { Emitter } from 'mitt';
-import { getImageDimensions, getSpatialInfo } from 'src/tools/utils';
+import { getSpatialInfo } from 'src/tools/utils';
 
 type Event = {
   'add-placemark': PlacemarkInfo;
   'placemark-panel-visibility': {
     visible: boolean;
     placemarkInfo?: PlacemarkInfo;
+    canvasPosition?: { x: number; y: number };
     id?: string;
   };
 };
@@ -32,7 +33,6 @@ class PlacemarkService {
     this.viewer.entities.add(this.movingPlacemark);
 
     this.emitter = mitt<Event>();
-    // this.store = usePlacemarkStore()
   }
 
   setPlacemarkMovingAction() {
@@ -87,7 +87,7 @@ class PlacemarkService {
     // turn mouse to hand
     this.handler.setInputAction((event: Cesium.ScreenSpaceEventHandler.MotionEvent) => {
       const pickedObject = this.scene.pick(event.endPosition);
-      if (Cesium.defined(pickedObject) && pickedObject.id) {
+      if (Cesium.defined(pickedObject) && pickedObject.id instanceof Placemark) {
         (this.viewer.container as HTMLDivElement).style.cursor = 'pointer';
       } else {
         (this.viewer.container as HTMLDivElement).style.cursor = 'default';
@@ -193,23 +193,17 @@ class PlacemarkService {
 
   hideNewPlacemarkPanel() {
     if (this.selectedPlacemark) {
-      this.selectedPlacemark.setDefaultStyle();
-      this.emitter.emit('placemark-panel-visibility', { visible: false });
+      this.selectedPlacemark.hidePanel();
+      this.emitter.emit('placemark-panel-visibility', { visible: Placemark.panelVisibility });
     }
   }
 
   showNewPlacemarkPanel(placemark: Placemark, isHighlighted = true) {
-    const position = placemark.position?.getValue(this.viewer.clock.currentTime) as Cesium.Cartesian3;
-    const canvasPosition = Cesium.SceneTransforms.wgs84ToWindowCoordinates(this.scene, position);
-
-    (placemark.info as PlacemarkInfo).canvasPositionX = canvasPosition.x;
-    (placemark.info as PlacemarkInfo).canvasPositionY = canvasPosition.y;
-    if (isHighlighted) {
-      placemark.setHighlightStyle();
-    }
+    placemark.showPanel(this.scene, isHighlighted);
 
     this.emitter.emit('placemark-panel-visibility', {
-      visible: true,
+      visible: Placemark.panelVisibility,
+      canvasPosition: Placemark.canvasPosition,
       placemarkInfo: placemark.info,
       id: placemark.id,
     });

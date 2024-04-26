@@ -1,7 +1,49 @@
 <template>
-  <q-page>
+  <q-page :style-fn="myTweak">
+    <q-bar class="bg-black text-white" ref="barRef">
+      <div class="cursor-pointer">File</div>
+      <div class="cursor-pointer">Edit</div>
+      <div class="cursor-pointer gt-xs">
+        View
+        <q-menu class="z-top">
+          <q-list dense style="min-width: 180px">
+            <q-item tag="label" clickable v-close-popup>
+              <q-item-section> <q-checkbox v-model="animation" /> </q-item-section>
+              <q-item-section>动画</q-item-section>
+            </q-item>
+            <q-item tag="label" clickable v-close-popup>
+              <q-item-section> <q-checkbox v-model="timeline" /> </q-item-section>
+              <q-item-section>时间轴</q-item-section>
+            </q-item>
+            <q-item tag="label" clickable v-close-popup>
+              <q-item-section> <q-checkbox v-model="baseLayerPicker" /> </q-item-section>
+              <q-item-section>基础图层</q-item-section>
+            </q-item>
+            <q-item tag="label" clickable v-close-popup>
+              <q-item-section> <q-checkbox v-model="fullscreenButton" /> </q-item-section>
+              <q-item-section>全盘按钮</q-item-section>
+            </q-item>
+            <q-item tag="label" clickable v-close-popup>
+              <q-item-section> <q-checkbox v-model="infoBox" /> </q-item-section>
+              <q-item-section>信息提示框</q-item-section>
+            </q-item>
+            <q-item tag="label" clickable v-close-popup>
+              <q-item-section> <q-checkbox v-model="showCredit" /> </q-item-section>
+              <q-item-section>版权信息</q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
+      </div>
+      <div class="cursor-pointer">
+        Search
+        <search-input v-if="!loading"></search-input>
+      </div>
+      <div class="cursor-pointer gt-xs">Window</div>
+      <div class="cursor-pointer">Help</div>
+      <q-space />
+    </q-bar>
     <vc-viewer
-      class="relative-position"
+      id="cesiumContainer"
       :animation="animation"
       :base-layer-picker="baseLayerPicker"
       :timeline="timeline"
@@ -14,48 +56,6 @@
       :show-credit="showCredit"
       @ready="ready"
     >
-      <q-bar class="bg-black text-white">
-        <div class="cursor-pointer">File</div>
-        <div class="cursor-pointer">Edit</div>
-        <div class="cursor-pointer gt-xs">
-          View
-          <q-menu class="z-top">
-            <q-list dense style="min-width: 180px">
-              <q-item tag="label" clickable v-close-popup>
-                <q-item-section> <q-checkbox v-model="animation" /> </q-item-section>
-                <q-item-section>动画</q-item-section>
-              </q-item>
-              <q-item tag="label" clickable v-close-popup>
-                <q-item-section> <q-checkbox v-model="timeline" /> </q-item-section>
-                <q-item-section>时间轴</q-item-section>
-              </q-item>
-              <q-item tag="label" clickable v-close-popup>
-                <q-item-section> <q-checkbox v-model="baseLayerPicker" /> </q-item-section>
-                <q-item-section>基础图层</q-item-section>
-              </q-item>
-              <q-item tag="label" clickable v-close-popup>
-                <q-item-section> <q-checkbox v-model="fullscreenButton" /> </q-item-section>
-                <q-item-section>全盘按钮</q-item-section>
-              </q-item>
-              <q-item tag="label" clickable v-close-popup>
-                <q-item-section> <q-checkbox v-model="infoBox" /> </q-item-section>
-                <q-item-section>信息提示框</q-item-section>
-              </q-item>
-              <q-item tag="label" clickable v-close-popup>
-                <q-item-section> <q-checkbox v-model="showCredit" /> </q-item-section>
-                <q-item-section>版权信息</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </div>
-        <div class="cursor-pointer">
-          Search
-          <search-input v-if="!loading"></search-input>
-        </div>
-        <div class="cursor-pointer gt-xs">Window</div>
-        <div class="cursor-pointer">Help</div>
-        <q-space />
-      </q-bar>
       <vc-navigation
         :offset="offset"
         @compass-evt="onNavigationEvt"
@@ -107,6 +107,7 @@ import { useVisualizationOptionsStore } from 'src/stores/VisualizationOptionsSto
 
 import NewPlaceMarkPanel from 'src/components/widgets/VisualizationOptions/AddPlaceMarkOption/NewPlaceMarkPanel.vue';
 
+const barRef = ref();
 const loading = ref(true);
 const animation = ref(true);
 const timeline = ref(true);
@@ -171,10 +172,17 @@ $emitter.on('propertiesPanelStateChange', (value: any) => {
   screenPosition.value = value.screenPosition != undefined ? value.screenPosition : screenPosition.value;
   propertiesPanelIsShow.value = value.isShow != undefined ? value.isShow : propertiesPanelIsShow.value;
 });
+
+const myTweak = (offset: number) => {
+  return {
+    height: `calc(100vh - ${offset + 32}px)`,
+  };
+};
 </script>
 
 <style lang="scss">
 #cesiumContainer {
-  height: 80vh !important;
+  // height: 80vh !important;
+  position: relative;
 }
 </style>

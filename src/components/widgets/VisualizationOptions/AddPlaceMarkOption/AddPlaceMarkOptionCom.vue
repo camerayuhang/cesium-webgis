@@ -54,6 +54,10 @@ placemarkService.emitter.on('placemark-panel-visibility', (e) => {
       placemarkStore.image_url = '';
     }
   }
+  if (e.canvasPosition) {
+    placemarkStore.canvasPosition.x = e.canvasPosition.x;
+    placemarkStore.canvasPosition.y = e.canvasPosition.y;
+  }
   placemarkStore.visible = e.visible;
 });
 
@@ -81,6 +85,7 @@ const { visible } = storeToRefs(placemarkStore);
 
 watch(visible, () => {
   if (!visible.value) {
+    placemarkStore.expanded = false;
     placemarkService.setPlacemarkSelectedAction();
     placemarkService.setCursorPointerAction();
     placemarkService.selectedPlacemark?.setDefaultStyle();

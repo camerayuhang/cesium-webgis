@@ -132,4 +132,47 @@ const createImgSrc = (base64String: string, type: string) => {
   return dataURL;
 };
 
-export { loadNetCDF, imageToUrl, getMediaDimension, getSpatialInfo, getImageDimensions, createImgSrc };
+const getLeftTopLimitedInContainer = (parent: HTMLElement, child: HTMLElement, childLeft: number, childTop: number) => {
+  const childWidth = child.offsetWidth;
+  const childHeight = child.offsetHeight;
+  const parentWidth = parent.offsetWidth;
+  const parentHeight = parent.offsetHeight;
+
+  // 如果 entity 的右边没有足够的空间放置 panel，则将 panel 放置在 entity 的左边
+  if (childLeft + childWidth > parentWidth) {
+    childLeft = Math.max(0, childLeft - childWidth);
+  }
+  // 如果 entity 在屏幕最上方，将 panel 放置在 entity 的下方
+  if (childTop < 0) {
+    childTop += childHeight;
+  }
+
+  // 如果 panel 底部超出了容器的底部，将 panel 上移
+  if (childTop + childHeight > parentHeight) {
+    childTop = parentHeight - childHeight;
+  }
+  // 如果 panel 的左边超出了容器的左边，将 panel 右移
+  if (childLeft < 0) {
+    childLeft = 0;
+  }
+
+  // childLeft = Math.max(childLeft, 0);
+  // childTop = Math.max(childTop, 0);
+  // if (childLeft + childWidth > parentWidth) {
+  //   childLeft = parentWidth - childWidth;
+  // }
+  // if (childTop + childHeight > parentHeight) {
+  //   childTop = parentHeight - childHeight;
+  // }
+  return { x: childLeft, y: childTop };
+};
+
+export {
+  loadNetCDF,
+  imageToUrl,
+  getMediaDimension,
+  getSpatialInfo,
+  getImageDimensions,
+  createImgSrc,
+  getLeftTopLimitedInContainer,
+};
