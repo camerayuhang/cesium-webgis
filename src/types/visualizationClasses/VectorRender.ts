@@ -1,13 +1,19 @@
 import { ParticleSystem, Util } from 'src/types/visualizationClasses/createParticleSystem';
 import { VectorRenderInputParams } from './VectorRenderInputParams';
 import axios from 'axios';
+import { NetCDFData } from '../NetCDFData';
+import { SupportClickToCalculateInterpolation } from './ClickToTriggerPanelShow';
+import { Properties } from '../Properties';
 // 矢量渲染类（用于海洋流场可视化）
-class VectorRender {
+class VectorRender implements SupportClickToCalculateInterpolation {
   private viewer: Cesium.Viewer;
   private _url: string;
+  private _data: any;
   private targetPointLocation!: [number, number];
   private userInput: VectorRenderInputParams;
   private particleSystem!: ParticleSystem | null;
+  private cameraMoveStartHandler;
+  private cameraMoveEndHandler;
   // 构造函数
   public constructor(viewer: Cesium.Viewer, userInput: VectorRenderInputParams, url: string) {
     // 从参数中获得viewer
@@ -17,15 +23,37 @@ class VectorRender {
     this.viewer.scene.primitives.destroyPrimitives = false;
     // 粒子参数赋值
     this.userInput = userInput;
+    // 相机移动的相关事件函数
+    this.cameraMoveStartHandler = () => {
+      this.viewer.scene.primitives.show = false;
+    };
+    this.cameraMoveEndHandler = () => {
+      this.updateViewerParameters();
+      // 渲染primitives
+      this.viewer.scene.primitives.show = true;
+    };
+  }
+  // 暂未实现，大概和ScalarRender差不多意思，根据数据data的不同，做一些调整
+  calculateValByInterpolation(lon: number, lat: number): Properties | null {
+    // 判断是否有数据
+    if (this._data != null) {
+      const bounds = this._data['bounds'];
+      // 判断经纬度是否在合理范围内
+      if (bounds[0][0] < lon && lon < bounds[2][0] && bounds[0][1] < lat && lat < bounds[1][1]) {
+        return { lon: lon, lat: lat, U: 0, V: 0 };
+      }
+    }
+    return null;
   }
   // 数据请求函数
-  private async loadData() {
+  private async loadData(): Promise<NetCDFData> {
     const json_data = await axios.get(this._url);
     json_data.data.U.array = new Float32Array(json_data.data.U.array);
     json_data.data.V.array = new Float32Array(json_data.data.V.array);
     json_data.data.lat.array = new Float32Array(json_data.data.lat.array);
     json_data.data.lon.array = new Float32Array(json_data.data.lon.array);
     json_data.data.lev.array = new Float32Array(json_data.data.lev.array);
+    this._data = json_data.data;
     return json_data.data;
   }
   public async createParticleSystem() {
@@ -74,8 +102,8 @@ class VectorRender {
   private addPrimitives() {
     // the order of primitives.add() should respect the dependency of primitives
     if (
-      this.particleSystem.particlesComputing.primitives != null &&
-      this.particleSystem.particlesRendering.primitives != null
+      (this.particleSystem as ParticleSystem).particlesComputing.primitives != null &&
+      (this.particleSystem as ParticleSystem).particlesRendering.primitives != null
     ) {
       this.viewer.scene.primitives.add(this.particleSystem.particlesComputing.primitives.calculateSpeed);
       this.viewer.scene.primitives.add(this.particleSystem.particlesComputing.primitives.updatePosition);
@@ -90,8 +118,8 @@ class VectorRender {
   public removePrimitives() {
     // the order of primitives.remove() should respect the dependency of primitives
     if (
-      this.particleSystem.particlesComputing.primitives != null &&
-      this.particleSystem.particlesRendering.primitives != null
+      (this.particleSystem as ParticleSystem).particlesComputing.primitives != null &&
+      (this.particleSystem as ParticleSystem).particlesRendering.primitives != null
     ) {
       this.viewer.scene.primitives.remove(this.particleSystem.particlesComputing.primitives.calculateSpeed);
       this.viewer.scene.primitives.remove(this.particleSystem.particlesComputing.primitives.updatePosition);
@@ -101,6 +129,8 @@ class VectorRender {
       this.viewer.scene.primitives.remove(this.particleSystem.particlesRendering.primitives.trails);
       this.viewer.scene.primitives.remove(this.particleSystem.particlesRendering.primitives.screen);
     }
+    this.viewer.camera.moveStart.removeEventListener(this.cameraMoveStartHandler);
+    this.viewer.camera.moveEnd.removeEventListener(this.cameraMoveEndHandler);
   }
 
   // 更新ViewerParameters(根据经纬度范围，更新粒子的像素大小)
@@ -137,20 +167,8 @@ class VectorRender {
 
   // 设置监听函数
   private setupEventListeners(): void {
-    // 相机开始移动时，不渲染primitives
-    this.viewer.camera.moveStart.addEventListener(() => {
-      this.viewer.scene.primitives.show = false;
-    });
-    // 相机停止移动时，更新ViewerParameters
-    this.viewer.camera.moveEnd.addEventListener(() => {
-      this.updateViewerParameters();
-      // 渲染primitives
-      this.viewer.scene.primitives.show = true;
-    });
-    // // 粒子系统参数改变时的事件
-    // window.addEventListener('particleSystemOptionsChanged', function () {
-    //     that.particleSystem.applyUserInput(this.userInput);
-    // });
+    this.viewer.camera.moveStart.addEventListener(this.cameraMoveStartHandler);
+    this.viewer.camera.moveEnd.addEventListener(this.cameraMoveEndHandler);
   }
 }
 

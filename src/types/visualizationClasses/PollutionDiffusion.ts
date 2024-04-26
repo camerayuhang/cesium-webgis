@@ -56,7 +56,7 @@ class PollutionDiffusion {
     const particlePixelSize = new Cesium.Cartesian2(15.0, 15.0);
     // 粒子渲染行为的回调函数
     const particleUpdateCallback = function (particle: any, dt: number) {
-      // 将粒子在地球上的位置转换到相对位置上（逆过程）
+      // 将粒子在地球上的位置转换到局部位置上（逆过程）
       const position = Cesium.Matrix4.multiplyByPoint(worldToParticle, particle.position, new Cesium.Cartesian3());
       // 判断粒子在局部坐标系内，是否超出范围
       if (position.z >= 5000 || position.z <= -5000) {
@@ -75,7 +75,7 @@ class PollutionDiffusion {
       emitter: new Cesium.SphereEmitter(100), //球形发射器
       lifetime: 100, //粒子系统的总寿命
       updateCallback: particleUpdateCallback, //粒子系统更新时的回调函数
-      // 这两矩阵的作用，就是得到particleToWorld，实现粒子从局部坐标转换到地球坐标
+      // 矩阵的作用，就是得到particleToWorld，实现粒子从局部坐标转换到地球坐标
       modelMatrix: modelMatrix,
     });
     // 调整相机视角，使其飞至并聚焦于粒子系统

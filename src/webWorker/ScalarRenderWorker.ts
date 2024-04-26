@@ -20,7 +20,7 @@ function trainKrigin(bounds: number[][][], dataList: ScalarInterface[]) {
     y.push(data.lat);
   }
   // 进行训练
-  const variogram = kriging.train(t, x, y, 'exponential', 0, 100);
+  const variogram = kriging.train(t, x, y, 'spherical', 0, 100);
   //构建格网
   const grid = kriging.grid(bounds, variogram, 0.001);
   return grid;

@@ -1,43 +1,5 @@
 <template>
   <q-page>
-    <q-bar class="bg-black text-white">
-      <div class="cursor-pointer">File</div>
-      <div class="cursor-pointer">Edit</div>
-      <div class="cursor-pointer gt-xs">
-        View
-        <q-menu class="z-top">
-          <q-list dense style="min-width: 180px">
-            <q-item tag="label" clickable v-close-popup>
-              <q-item-section> <q-checkbox v-model="animation" /> </q-item-section>
-              <q-item-section>动画</q-item-section>
-            </q-item>
-            <q-item tag="label" clickable v-close-popup>
-              <q-item-section> <q-checkbox v-model="timeline" /> </q-item-section>
-              <q-item-section>时间轴</q-item-section>
-            </q-item>
-            <q-item tag="label" clickable v-close-popup>
-              <q-item-section> <q-checkbox v-model="baseLayerPicker" /> </q-item-section>
-              <q-item-section>基础图层</q-item-section>
-            </q-item>
-            <q-item tag="label" clickable v-close-popup>
-              <q-item-section> <q-checkbox v-model="fullscreenButton" /> </q-item-section>
-              <q-item-section>全盘按钮</q-item-section>
-            </q-item>
-            <q-item tag="label" clickable v-close-popup>
-              <q-item-section> <q-checkbox v-model="infoBox" /> </q-item-section>
-              <q-item-section>信息提示框</q-item-section>
-            </q-item>
-            <q-item tag="label" clickable v-close-popup>
-              <q-item-section> <q-checkbox v-model="showCredit" /> </q-item-section>
-              <q-item-section>版权信息</q-item-section>
-            </q-item>
-          </q-list>
-        </q-menu>
-      </div>
-      <div class="cursor-pointer gt-xs">Window</div>
-      <div class="cursor-pointer">Help</div>
-      <q-space />
-    </q-bar>
     <vc-viewer
       class="relative-position"
       :animation="animation"
@@ -52,21 +14,54 @@
       :show-credit="showCredit"
       @ready="ready"
     >
+      <q-bar class="bg-black text-white">
+        <div class="cursor-pointer">File</div>
+        <div class="cursor-pointer">Edit</div>
+        <div class="cursor-pointer gt-xs">
+          View
+          <q-menu class="z-top">
+            <q-list dense style="min-width: 180px">
+              <q-item tag="label" clickable v-close-popup>
+                <q-item-section> <q-checkbox v-model="animation" /> </q-item-section>
+                <q-item-section>动画</q-item-section>
+              </q-item>
+              <q-item tag="label" clickable v-close-popup>
+                <q-item-section> <q-checkbox v-model="timeline" /> </q-item-section>
+                <q-item-section>时间轴</q-item-section>
+              </q-item>
+              <q-item tag="label" clickable v-close-popup>
+                <q-item-section> <q-checkbox v-model="baseLayerPicker" /> </q-item-section>
+                <q-item-section>基础图层</q-item-section>
+              </q-item>
+              <q-item tag="label" clickable v-close-popup>
+                <q-item-section> <q-checkbox v-model="fullscreenButton" /> </q-item-section>
+                <q-item-section>全盘按钮</q-item-section>
+              </q-item>
+              <q-item tag="label" clickable v-close-popup>
+                <q-item-section> <q-checkbox v-model="infoBox" /> </q-item-section>
+                <q-item-section>信息提示框</q-item-section>
+              </q-item>
+              <q-item tag="label" clickable v-close-popup>
+                <q-item-section> <q-checkbox v-model="showCredit" /> </q-item-section>
+                <q-item-section>版权信息</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </div>
+        <div class="cursor-pointer">
+          Search
+          <search-input v-if="!loading"></search-input>
+        </div>
+        <div class="cursor-pointer gt-xs">Window</div>
+        <div class="cursor-pointer">Help</div>
+        <q-space />
+      </q-bar>
       <vc-navigation
         :offset="offset"
         @compass-evt="onNavigationEvt"
         :other-opts="otherOpts"
         @zoom-evt="onNavigationEvt"
       ></vc-navigation>
-
-      <!-- Cesium Entity -->
-      <!-- <vc-entity @click="onEntityClick" :position="position" :point="point" :label="label">
-          <vc-graphics-billboard
-            image="https://zouyaoji.top/vue-cesium/favicon.png"
-            :scale="0.5"
-          ></vc-graphics-billboard>
-          <vc-graphics-rectangle :coordinates="[130, 20, 80, 25]" material="green"></vc-graphics-rectangle>
-        </vc-entity> -->
 
       <WindMap :windData="windData" v-if="visualizationOptionsStore.overlayWindMap"></WindMap>
       <new-place-mark-panel v-if="!loading"></new-place-mark-panel>
@@ -86,20 +81,28 @@
       </vc-layer-imagery>
 
       <!-- <tool-bar></tool-bar> -->
+      <properties-panel
+        v-if="!loading"
+        v-show="propertiesPanelIsShow"
+        :position="screenPosition"
+        :properties="properties"
+      ></properties-panel>
       <tab-menu-com v-if="!loading"></tab-menu-com>
-      <panoramic-map-com></panoramic-map-com> </vc-viewer
+      <panoramic-map-panel v-if="!loading" v-show="panoramicMapPanelIsShow"></panoramic-map-panel> </vc-viewer
   ></q-page>
 </template>
 
 <script setup lang="ts">
 import { VcCompassEvt, VcZoomEvt } from 'vue-cesium/es/utils/types';
 
-import { ref, watch } from 'vue';
+import { ref, watch, getCurrentInstance, ComponentInternalInstance } from 'vue';
 import { loadNetCDF } from 'src/tools/utils';
 import { NetCDFData } from 'src/types/NetCDFData';
 import WindMap from 'src/components/WindMap.vue';
 import TabMenuCom from 'src/components/widgets/TabMenuCom.vue';
-import PanoramicMapCom from 'src/components/widgets/PanoramicMapCom.vue';
+import PanoramicMapPanel from 'src/components/widgets/VisualizationOptions/PanoramicMap/PanoramicMapPanel.vue';
+import PropertiesPanel from 'src/components/widgets/PropertiesPanel.vue';
+import SearchInput from 'src/components/widgets/SearchInput.vue';
 import { useVisualizationOptionsStore } from 'src/stores/VisualizationOptionsStore';
 
 import NewPlaceMarkPanel from 'src/components/widgets/VisualizationOptions/AddPlaceMarkOption/NewPlaceMarkPanel.vue';
@@ -117,25 +120,18 @@ const showCredit = ref(false);
 const windData = ref<NetCDFData>();
 
 const offset = ref<[number, number]>([50, 25]);
+// 全景图控件相关
+const panoramicMapPanelIsShow = ref(false);
+// 标量场可视化控件相关
+const propertiesPanelIsShow = ref(false);
+const properties = ref({});
+const screenPosition = ref({ x: 0, y: 0 });
 
 const visualizationOptionsStore = useVisualizationOptionsStore();
-
 const otherOpts = ref({
   offset: [0, 32],
   position: 'bottom-right',
 });
-
-// const point = ref({
-//   pixelSize: 28,
-//   color: 'red',
-// });
-
-// const position = ref({ lng: 108, lat: 32 } as VcPosition);
-
-// const label = ref({
-//   text: 'Hello World',
-//   pixelOffset: [0, 150],
-// });
 
 watch(timeline, (val) => {
   otherOpts.value.offset = val ? [0, 30] : fullscreenButton.value ? [30, 5] : [0, 5];
@@ -152,9 +148,6 @@ watch(fullscreenButton, (val) => {
 const onNavigationEvt = (e: VcCompassEvt | VcZoomEvt) => {
   console.log(e);
 };
-// const onEntityClick = (e: VcPickEvent) => {
-//   console.log(e);
-// };
 
 const ready = () => {
   // window.vm = this;
@@ -165,6 +158,19 @@ const ready = () => {
   });
   loading.value = false;
 };
+
+// 获取全局事件监听对象
+const { $emitter } = (getCurrentInstance() as ComponentInternalInstance).appContext.config.globalProperties;
+// 控制全景地图面板的显示和隐藏
+$emitter.on('panoramicMapPanelIsShow', (value: boolean | unknown) => {
+  panoramicMapPanelIsShow.value = value as boolean;
+});
+// 控制属性面板的显示和隐藏
+$emitter.on('propertiesPanelStateChange', (value: any) => {
+  properties.value = value.properties != undefined ? value.properties : properties.value;
+  screenPosition.value = value.screenPosition != undefined ? value.screenPosition : screenPosition.value;
+  propertiesPanelIsShow.value = value.isShow != undefined ? value.isShow : propertiesPanelIsShow.value;
+});
 </script>
 
 <style lang="scss">
