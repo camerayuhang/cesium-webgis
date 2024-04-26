@@ -12,7 +12,8 @@
     <q-separator></q-separator>
 
     <photogrammetry-tile-com></photogrammetry-tile-com>
-
+    <q-item-label header class="text-h6">Panels</q-item-label>
+    <panoramic-map-com></panoramic-map-com>
     <q-item-label header class="text-h6">Tools</q-item-label>
 
     <add-place-mark-option-com></add-place-mark-option-com>
@@ -23,6 +24,7 @@
 import ScalarRenderCom from 'src/components/widgets/VisualizationOptions/ScalarRender/ScalarRenderCom.vue';
 import PollutionDiffusionCom from 'src/components/widgets/VisualizationOptions/PollutionDiffusion/PollutionDiffusionCom.vue';
 import VectorRenderCom from 'src/components/widgets/VisualizationOptions/VectorRender/VectorRenderCom.vue';
+import PanoramicMapCom from 'src/components/widgets/VisualizationOptions/PanoramicMap/PanoramicMapCom.vue';
 
 import AddPlaceMarkOptionCom from './AddPlaceMarkOption/AddPlaceMarkOptionCom.vue';
 import PhotogrammetryTileCom from './Photogrammetry/PhotogrammetryTileCom.vue';

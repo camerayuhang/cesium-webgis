@@ -14,8 +14,7 @@ export const useVisualizationOptionsStore = defineStore('visualizationOptions', 
     lineWidth: 4.0,
   });
 
-  // 判断是否scalarField正在加载
-  const scalarFieldIsLoading = ref(false);
 
-  return { overlayWindMap, particleSystemOptions, scalarFieldIsLoading };
+
+  return { overlayWindMap, particleSystemOptions};
 });

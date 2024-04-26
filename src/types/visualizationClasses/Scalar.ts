@@ -7,6 +7,7 @@ interface ScalarInterface {
 // 标量的数据结构
 interface ScalarDataStruct {
   time: string;
+  dimensions: { lat: number; lon: number; lev: number };
   bounds: number[][];
   data: ScalarInterface[];
 }
