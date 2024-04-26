@@ -17,6 +17,10 @@ export default boot(async ({ app } /* { app, router, ... } */) => {
     accessToken:
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkMDRjYzAwNi03NDc3LTQ0YWQtYjEzOC1mZDMwNGI0YjYwMzciLCJpZCI6OTEyODAsImlhdCI6MTY1MDk1MTE3OX0.le9nlEZJur0SDWvxi9Hvd99cd3f61FfZKku4bC_gnsU',
   });
+
+  // if (typeof (window as any).Ceisum === 'undefined') {
+  //   (window as any).Ceisum = window
+  // }
   // something to do
   // window.CESIUM_BASE_URL = 'node_modules/cesium/Build/CesiumUnminified/';
   // Cesium.Ion.defaultAccessToken =

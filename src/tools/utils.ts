@@ -87,4 +87,49 @@ const imageToUrl = (file: File) => {
   const objectURL = URL.createObjectURL(file);
   return objectURL;
 };
-export { loadNetCDF, imageToUrl };
+
+const getMediaDimension = (media: HTMLImageElement | HTMLVideoElement) => {
+  const width = media instanceof HTMLImageElement ? media.naturalWidth : media.videoWidth;
+  const height = media instanceof HTMLImageElement ? media.naturalHeight : media.videoHeight;
+  return { width, height };
+};
+
+const getSpatialInfo = (position: Cesium.PositionProperty | Cesium.Cartesian3) => {
+  if (position instanceof Cesium.PositionProperty) {
+    position = position.getValue(new Cesium.JulianDate()) as Cesium.Cartesian3;
+  }
+  const cartographic = Cesium.Cartographic.fromCartesian(position);
+  const longitude = Cesium.Math.toDegrees(cartographic.longitude);
+  const latitude = Cesium.Math.toDegrees(cartographic.latitude);
+  const height = cartographic.height;
+
+  return {
+    longitude,
+    latitude,
+    height,
+    cartesian_x: position.x,
+    cartesian_y: position.y,
+    cartesian_z: position.z,
+  };
+};
+
+const getImageDimensions = (file: File | string): Promise<{ width: number; height: number }> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      resolve({ width: img.width, height: img.height });
+    };
+    img.onerror = (error) => {
+      reject(error);
+    };
+    img.src = file instanceof File ? URL.createObjectURL(file) : file;
+  });
+};
+
+const createImgSrc = (base64String: string, type: string) => {
+  // 构建 Data URL
+  const dataURL = `data:${type};base64,${base64String}`;
+  return dataURL;
+};
+
+export { loadNetCDF, imageToUrl, getMediaDimension, getSpatialInfo, getImageDimensions, createImgSrc };
