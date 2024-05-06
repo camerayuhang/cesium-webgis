@@ -3,6 +3,10 @@ import { Placemark } from './Placemark';
 import { PlacemarkInfo, PlacemarkInfoToSend } from './PlacemarkInfo';
 import mitt, { Emitter } from 'mitt';
 import { getSpatialInfo } from 'src/tools/utils';
+import { PlacemarkNode } from './PlacemarkNode';
+import { Ref } from 'vue';
+
+import { QTreeNode } from 'quasar/dist/types/api/qtree';
 
 type Event = {
   'add-placemark': PlacemarkInfo;
@@ -22,8 +26,10 @@ class PlacemarkService {
   selectedPlacemark: Placemark | null;
   movingPlacemark: Placemark;
   emitter: Emitter<Event>;
+  placemarkNodes: QTreeNode[];
+  removeCallback?: Cesium.Event.RemoveCallback;
 
-  constructor(viewer: Cesium.Viewer) {
+  constructor(viewer: Cesium.Viewer, placemarkNodes: QTreeNode[]) {
     this.viewer = viewer;
     this.scene = viewer.scene;
     this.canvas = this.scene.canvas;
@@ -31,8 +37,8 @@ class PlacemarkService {
     this.selectedPlacemark = null;
     this.movingPlacemark = this.createPlaceMark();
     this.viewer.entities.add(this.movingPlacemark);
-
     this.emitter = mitt<Event>();
+    this.placemarkNodes = placemarkNodes;
   }
 
   setPlacemarkMovingAction() {
@@ -97,11 +103,19 @@ class PlacemarkService {
 
   async createAllPlacemarks() {
     const placemarkInfoArray = await getAllPlacemarks();
+    this.placemarkNodes.push({
+      id: 'root',
+      label: 'Placemarks',
+      header: 'root',
+      children: [] as QTreeNode[],
+      icon: 'public',
+    });
 
     placemarkInfoArray.forEach(async (placemarkInfo) => {
       const placemark = this.createPlaceMark(placemarkInfo);
-      await placemark.updateInfoInCesium();
       this.viewer.entities.add(placemark);
+      await placemark.updateCesiumInfoFromPanel();
+      (this.placemarkNodes[0].children as QTreeNode[]).push(this.createPlacemarkNode(placemark));
     });
   }
 
@@ -113,23 +127,12 @@ class PlacemarkService {
         this.viewer.entities.remove(entity);
       }
     });
+    this.placemarkNodes.splice(0, 1);
     // clean events
     this.removeScreenSpaceEvent();
   }
 
   async createAndSavePlaceMark(cartesian: Cesium.Cartesian3) {
-    // let placemarkInfo: PlacemarkInfo = {
-    //   id: '',
-    //   name: '',
-    //   description: '',
-    //   longitude: 0,
-    //   latitude: 0,
-    //   height: 0,
-    //   cartesian_x: 0,
-    //   cartesian_y: 0,
-    //   cartesian_z: 0,
-    // };
-
     const placemarkInfoForm: PlacemarkInfoToSend = getSpatialInfo(cartesian);
     const placemarkInfo = await createPlaceMarkInfo(placemarkInfoForm);
 
@@ -138,10 +141,44 @@ class PlacemarkService {
     return placemark;
   }
 
+  setEntityCollectionChangedAction() {
+    this.viewer.entities.collectionChanged.removeEventListener;
+    const callback: Cesium.EntityCollection.CollectionChangedEventCallback = (collection, added, removed, changed) => {
+      removed.forEach((entity) => {
+        if (entity instanceof Placemark) {
+          const id = entity.id;
+          (this.placemarkNodes[0].children as QTreeNode[]).splice(
+            (this.placemarkNodes[0].children as QTreeNode[]).findIndex((placemarkNode) => placemarkNode.id === id),
+            1
+          );
+        }
+      });
+      added.forEach((entity) => {
+        if (entity instanceof Placemark) {
+          (this.placemarkNodes[0].children as QTreeNode[]).push(this.createPlacemarkNode(entity));
+        }
+      });
+    };
+    this.removeCallback = this.viewer.entities.collectionChanged.addEventListener(callback);
+  }
+  // initplacemarkNodes(placemarkNodes: PlacemarkNode[]) {
+  //   this.viewer.entities.values.forEach((entity) => {
+  //     if (entity instanceof Placemark && entity.id !== '-1') {
+  //       const placemarkNode: PlacemarkNode = {
+  //         id: entity.id,
+  //         label: entity.info.name as string,
+  //         labelVisibility: (entity.label as Cesium.LabelGraphics).show?.getValue(new Cesium.JulianDate()),
+  //         billboardVisibility: (entity.billboard as Cesium.BillboardGraphics).show?.getValue(new Cesium.JulianDate()),
+  //       };
+  //       placemarkNodes.push(placemarkNode);
+  //     }
+  //   });
+  // }
+
   createPlaceMark(
     placemarkInfo: PlacemarkInfo = {
       id: '-1',
-      name: '',
+      name: 'Untitled Placemark',
       description: '',
       longitude: 0,
       latitude: 0,
@@ -184,6 +221,27 @@ class PlacemarkService {
 
     placemark.setDefaultStyle();
     return placemark;
+  }
+
+  createPlacemarkNode(Placemark: Placemark) {
+    const node: QTreeNode = {
+      id: Placemark.id,
+      label: Placemark.info.name as string,
+      icon: 'push_pin',
+      header: 'placemark',
+      entityVisibility: Placemark.show,
+      children: [
+        {
+          parentId: Placemark.id,
+          body: 'content',
+          labelVisibility: (Placemark.label as Cesium.LabelGraphics).show?.getValue(new Cesium.JulianDate()),
+          billboardVisibility: (Placemark.billboard as Cesium.BillboardGraphics).show?.getValue(
+            new Cesium.JulianDate()
+          ),
+        },
+      ],
+    };
+    return node;
   }
 
   removeScreenSpaceEvent() {

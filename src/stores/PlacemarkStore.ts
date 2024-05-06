@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia';
+import { QTreeNode } from 'quasar/dist/types/api/qtree';
 import { PlacemarkInfoToSend } from 'src/types/PlacemarkService/PlacemarkInfo';
+import { PlacemarkNode } from 'src/types/PlacemarkService/PlacemarkNode';
 import { ref } from 'vue';
 
 export const usePlacemarkStore = defineStore('PlacemarkStore', () => {
@@ -21,6 +23,9 @@ export const usePlacemarkStore = defineStore('PlacemarkStore', () => {
   const canvasPosition = { x: 0, y: 0 };
   const expanded = ref(false);
   const saved = ref(false);
+  const placemarkNodes = ref<QTreeNode[]>([]);
+
+  const simple = ref<QTreeNode[]>([]);
 
   // const updatePlacemarkArray = (id: string) => {
   //   const placemark = placemarkArray.value.find((placemark) => placemark.id === id) as PlacemarkInfo;
@@ -54,6 +59,8 @@ export const usePlacemarkStore = defineStore('PlacemarkStore', () => {
     placemarkForm,
     saved,
     expanded,
+    simple,
+    placemarkNodes,
     resetCurrentPlacemark,
   };
 });

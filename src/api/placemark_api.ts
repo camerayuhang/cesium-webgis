@@ -7,8 +7,10 @@ const getAllPlacemarks = async (): Promise<PlacemarkInfo[]> => {
   Loading.show({
     message: 'Loading all placemarks...',
   });
-  const { data } = await placemarkAPI.get('/placemarkinfo');
-  if (!data) return new Array<PlacemarkInfo>(0);
+  let { data } = await placemarkAPI.get('/placemarkinfo');
+  if (!data) {
+    data = new Array<PlacemarkInfo>(0);
+  }
   Loading.hide();
   Notify.create({
     message: 'Loading all placemarks successfully!',

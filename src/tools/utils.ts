@@ -113,8 +113,8 @@ const getSpatialInfo = (position: Cesium.PositionProperty | Cesium.Cartesian3) =
   };
 };
 
-const getImageDimensions = (file: File | string): Promise<{ width: number; height: number }> => {
-  return new Promise((resolve, reject) => {
+const getImageDimensions = (file: File | string) => {
+  return new Promise<{ width: number; height: number }>((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
       resolve({ width: img.width, height: img.height });

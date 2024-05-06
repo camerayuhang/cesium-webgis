@@ -1,6 +1,8 @@
 import { createImgSrc, getImageDimensions, getLeftTopLimitedInContainer } from 'src/tools/utils';
 import { PlacemarkInfo, PlacemarkInfoToSend } from './PlacemarkInfo';
 import { deletePlacemarkById, deletePlacemarkImageById, updatePlacemarkInfoById } from 'src/api/placemark_api';
+import { PlacemarkNode } from './PlacemarkNode';
+import { BillboardGraphics, JulianDate, LabelGraphics } from 'cesium';
 
 interface RequiredPointGraphicsOptions extends Cesium.Entity.ConstructorOptions {
   point: Cesium.PointGraphics | Cesium.PointGraphics.ConstructorOptions;
@@ -29,11 +31,18 @@ class Placemark extends Cesium.Entity {
 
   async update(propsToUpdate: PlacemarkInfoToSend) {
     await this.updateInfo(propsToUpdate);
-    await this.updateInfoInCesium();
+    await this.updateCesiumInfoFromPanel();
   }
 
-  async updateInfoInCesium() {
-    // update placemark
+  // updateCesiumInfoFromNode() {
+  //   (this.label as Cesium.LabelGraphics).text = new Cesium.ConstantProperty(this.nodes.label);
+  //   this.show = this.nodes.entityVisibility;
+  //   (this.label as Cesium.LabelGraphics).show = new Cesium.ConstantProperty(this.nodes.labelVisibility);
+  //   (this.billboard as Cesium.BillboardGraphics).show = new Cesium.ConstantProperty(this.nodes.billboardVisibility);
+  // }
+
+  async updateCesiumInfoFromPanel() {
+    // update
     (this.label as Cesium.LabelGraphics).text = new Cesium.ConstantProperty(this.info.name);
     const billboard = this.billboard as Cesium.BillboardGraphics;
     if (this.info.placemark_image) {
@@ -58,6 +67,7 @@ class Placemark extends Cesium.Entity {
     const placemarkInfo = await updatePlacemarkInfoById(this.info.id, propsToUpdate);
 
     this.info = placemarkInfo;
+    // this.nodes.label = this.info.name as string;
   }
 
   async deleteInfo() {

@@ -10,12 +10,16 @@
       visibility: placemarkStore.visible ? 'visible' : 'hidden',
     }"
   >
-    <q-card-section class="row items-center q-pb-sm">
-      <div class="text-h6">New Placemark</div>
-      <q-space />
+    <!-- <q-card-section class="row items-center q-pb-sm"> -->
+    <q-toolbar class="bg-primary text-white glossy">
+      <q-avatar rounded icon="add_location" size="xl"></q-avatar>
+      <q-toolbar-title><span class="text-weight-bold">New Placemark</span></q-toolbar-title>
       <q-btn icon="close" flat round dense v-close-popup @click="cancelHandler" />
-    </q-card-section>
-    <q-scroll-area :style="{ width: 35 + 'vh', height: 40 + 'vh' }">
+    </q-toolbar>
+    <!-- <div class="text-h6"></div> -->
+    <!-- <q-space /> -->
+    <!-- </q-card-section> -->
+    <q-scroll-area class="scroll-content">
       <div class="content">
         <q-img
           :src="placemarkStore.image_url"
@@ -31,9 +35,9 @@
             style="top: 0; right: 3.5vh; transform: translateY(-50%)"
           />
 
-          <div class="row no-wrap items-center">
+          <div class="row no-wrap items-center justify-between">
             <div class="col text-h6 ellipsis">{{ placemarkStore.placemarkForm.name }}</div>
-            <div class="col-auto text-grey text-caption q-pt-md row no-wrap items-center">
+            <div class="col-auto text-grey text-caption q-pt-md">
               {{ Math.abs(placemarkStore.placemarkForm.longitude as number).toFixed(2) }}°{{
                 (placemarkStore.placemarkForm.longitude as number) < 0 ? 'E' : 'W'
               }}
@@ -124,12 +128,10 @@
 </template>
 
 <script setup lang="ts">
-import { Visibility } from 'cesium';
-import { deletePlacemarkImageById, updatePlacemarkInfoById } from 'src/api/placemark_api';
+import { QTreeNode } from 'quasar';
 import { usePlacemarkStore } from 'src/stores/PlacemarkStore';
-import { getMediaDimension, imageToUrl } from 'src/tools/utils';
+import { imageToUrl } from 'src/tools/utils';
 import { Placemark } from 'src/types/PlacemarkService/Placemark';
-import { PlacemarkInfo } from 'src/types/PlacemarkService/PlacemarkInfo';
 import { ref } from 'vue';
 import { useVueCesium } from 'vue-cesium';
 
@@ -139,7 +141,6 @@ const placemarkStore = usePlacemarkStore();
 // const fileRef = ref<File | null>(null);
 const qCardRef = ref();
 const qImgRef = ref();
-const expanded = ref(false);
 const fileSelectedHandler = (file: File) => {
   placemarkStore.image_url = imageToUrl(file);
 };
@@ -147,37 +148,18 @@ const fileSelectedHandler = (file: File) => {
 const savePlacemarkInfo = async () => {
   const id = placemarkStore.placemarkForm.id as string;
   const placemark = viewer.entities.getById(id) as Placemark;
-  // const imgElement = qImgRef.value.$el.querySelector('img') as HTMLImageElement;
-  // const { width, height } = getMediaDimension(imgElement);
+
   const propsToUpdate = {
     name: placemarkStore.placemarkForm.name,
     description: placemarkStore.placemarkForm.description,
     file: placemarkStore.placemarkForm.file,
   };
   await placemark.update(propsToUpdate);
-  // placemarkStore.image_url = placemark.info.placemark_image?.image;
+  ((placemarkStore.placemarkNodes[0].children as QTreeNode[]).find((node) => node.id === id) as QTreeNode).label =
+    placemarkStore.placemarkForm.name;
   cancelHandler();
 
-  // update placemark
-  // const billboard = placemark.billboard as Cesium.BillboardGraphics;
-  // (placemark.label as Cesium.LabelGraphics).text = new Cesium.ConstantProperty(placemarkStore.placemarkForm.name);
-  // billboard.image = new Cesium.ConstantProperty(placemarkStore.placemarkForm.image_url);
-  // billboard.width = new Cesium.ConstantProperty((100 * width) / height);
-  // billboard.height = new Cesium.ConstantProperty(100);
-
-  // update placemarkinfo stored in placemark
-  // (placemark.info as PlacemarkInfo).name = placemarkStore.placemarkForm.name;
-  // (placemark.info as PlacemarkInfo).description = placemarkStore.placemarkForm.description;
-  // (placemark.info as PlacemarkInfo).image_url = placemarkStore.placemarkForm.image_url;
-
-  // // update placemarkinfo on postgresql
-  // updatePlacemarkInfoById(id, {
-  //   name: placemarkStore.placemarkForm.name,
-  //   description: placemarkStore.placemarkForm.description,
-  //   image_url: placemarkStore.placemarkForm.image_url,
-  // });
-
-  // placemarkStore.updatePlacemarkArray(placemarkStore.placemarkForm.id);
+  // placemarkStore.treeNodes = { ...placemarkStore.treeNodes };
 };
 
 const clearImg = async () => {
@@ -207,7 +189,12 @@ const deleteHandler = async () => {
 </script>
 
 <style lang="scss" scoped>
-// #placemark-panel .content {
-//   overflow-y: scroll;
-// }
+.scroll-content {
+  width: 35vh;
+  height: 40vh;
+  .content {
+    width: 35vh;
+    // height: 40vh;
+  }
+}
 </style>

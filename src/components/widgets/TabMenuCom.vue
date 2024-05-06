@@ -46,6 +46,13 @@ const tab = ref('MapOptions');
   .content {
     height: 60vh;
     // overflow: scroll;
+    .q-panel {
+      overflow: hidden;
+    }
+    .q-tab-panel {
+      overflow-y: scroll;
+      overflow-x: hidden;
+    }
   }
 }
 </style>
