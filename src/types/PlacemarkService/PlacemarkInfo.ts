@@ -1,3 +1,5 @@
+import { PlacemarkPointInfo } from './PlacemarkPointInfo';
+
 interface PlacemarkInfo {
   id: string;
   name?: string;
@@ -9,8 +11,7 @@ interface PlacemarkInfo {
   cartesian_y: number;
   cartesian_z: number;
   placemark_image?: PlacemarkImage;
-  // canvasPositionX?: number;
-  // canvasPositionY?: number;
+  placemark_point: PlacemarkPointInfo;
 }
 
 interface PlacemarkImage {
@@ -22,6 +23,7 @@ interface PlacemarkImage {
 
 interface PlacemarkInfoToSend extends Partial<PlacemarkInfo> {
   file?: File;
+  placemark_point: PlacemarkPointInfo;
 }
 
 // type PlacemarkInfoToSend = Omit<PlacemarkInfo, 'canvasPositionX' | 'canvasPositionY' | 'id'>;

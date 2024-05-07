@@ -54,7 +54,7 @@
           <div class="text-caption text-grey">{{ placemarkStore.placemarkForm.description }}</div>
         </q-card-section>
 
-        <q-expansion-item expand-separator v-model="placemarkStore.expanded" header-class="text-primary">
+        <q-expansion-item expand-separator v-model="placemarkStore.editExpanded" header-class="text-primary">
           <template v-slot:header>
             <q-item-section avatar>
               <q-avatar color="primary" text-color="white" icon="edit" />
@@ -111,6 +111,130 @@
             />
           </q-card-section>
         </q-expansion-item>
+        <q-expansion-item expand-separator v-model="placemarkStore.styleExpanded" header-class="text-primary">
+          <template v-slot:header>
+            <q-item-section avatar>
+              <q-avatar color="primary" text-color="white" icon="style" />
+            </q-item-section>
+            <q-item-section> Style </q-item-section>
+          </template>
+          <q-card-section>
+            <div class="text-subtitle1">Default style</div>
+            <q-input outlined dense v-model="placemarkStore.placemarkForm.placemark_point.default_color" label="Color">
+              <template v-slot:append>
+                <q-avatar
+                  text-color="grey"
+                  icon="colorize"
+                  class="cursor-pointer"
+                  :style="{ backgroundColor: placemarkStore.placemarkForm.placemark_point.default_color }"
+                >
+                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                    <q-color v-model="placemarkStore.placemarkForm.placemark_point.default_color" />
+                  </q-popup-proxy>
+                </q-avatar>
+
+                <!-- <q-icon
+                  name="colorize"
+                  class="cursor-pointer"
+                  :style="{ color: placemarkStore.placemarkForm.placemark_point.default_color }"
+                >
+                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                    <q-color v-model="placemarkStore.placemarkForm.placemark_point.default_color" />
+                  </q-popup-proxy>
+                </q-icon> -->
+              </template>
+            </q-input>
+            <q-input
+              dense
+              outlined
+              v-model="placemarkStore.placemarkForm.placemark_point.default_outline_color"
+              label="Outline color"
+            >
+              <template v-slot:append>
+                <q-avatar
+                  text-color="grey"
+                  icon="colorize"
+                  class="cursor-pointer"
+                  :style="{ backgroundColor: placemarkStore.placemarkForm.placemark_point.default_outline_color }"
+                >
+                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                    <q-color v-model="placemarkStore.placemarkForm.placemark_point.default_outline_color" />
+                  </q-popup-proxy>
+                </q-avatar>
+              </template>
+            </q-input>
+            <q-input
+              dense
+              outlined
+              v-model="placemarkStore.placemarkForm.placemark_point.default_outline_width"
+              label="Outline width"
+            >
+            </q-input>
+            <q-input
+              dense
+              outlined
+              v-model="placemarkStore.placemarkForm.placemark_point.default_pixel_size"
+              label="Pixel size"
+            >
+            </q-input>
+          </q-card-section>
+          <q-card-section>
+            <div class="text-subtitle1">Highlight style</div>
+
+            <q-input
+              dense
+              outlined
+              v-model="placemarkStore.placemarkForm.placemark_point.highlight_color"
+              label="Color"
+            >
+              <template v-slot:append>
+                <q-avatar
+                  text-color="grey"
+                  icon="colorize"
+                  :style="{ backgroundColor: placemarkStore.placemarkForm.placemark_point.highlight_color }"
+                  class="cursor-pointer"
+                >
+                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                    <q-color v-model="placemarkStore.placemarkForm.placemark_point.highlight_color" />
+                  </q-popup-proxy>
+                </q-avatar>
+              </template>
+            </q-input>
+            <q-input
+              dense
+              outlined
+              v-model="placemarkStore.placemarkForm.placemark_point.highlight_outline_color"
+              label="Outline color"
+            >
+              <template v-slot:append>
+                <q-avatar
+                  text-color="grey"
+                  icon="colorize"
+                  :style="{ backgroundColor: placemarkStore.placemarkForm.placemark_point.highlight_outline_color }"
+                  class="cursor-pointer"
+                >
+                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                    <q-color v-model="placemarkStore.placemarkForm.placemark_point.highlight_outline_color" />
+                  </q-popup-proxy>
+                </q-avatar>
+              </template>
+            </q-input>
+            <q-input
+              dense
+              outlined
+              v-model="placemarkStore.placemarkForm.placemark_point.highlight_outline_width"
+              label="Outline width"
+            >
+            </q-input>
+            <q-input
+              dense
+              outlined
+              v-model="placemarkStore.placemarkForm.placemark_point.highlight_pixel_size"
+              label="Pixel size"
+            >
+            </q-input>
+          </q-card-section>
+        </q-expansion-item>
       </div>
     </q-scroll-area>
     <q-separator />
@@ -132,6 +256,7 @@ import { QTreeNode } from 'quasar';
 import { usePlacemarkStore } from 'src/stores/PlacemarkStore';
 import { imageToUrl } from 'src/tools/utils';
 import { Placemark } from 'src/types/PlacemarkService/Placemark';
+
 import { ref } from 'vue';
 import { useVueCesium } from 'vue-cesium';
 
@@ -148,13 +273,14 @@ const fileSelectedHandler = (file: File) => {
 const savePlacemarkInfo = async () => {
   const id = placemarkStore.placemarkForm.id as string;
   const placemark = viewer.entities.getById(id) as Placemark;
-
   const propsToUpdate = {
     name: placemarkStore.placemarkForm.name,
     description: placemarkStore.placemarkForm.description,
     file: placemarkStore.placemarkForm.file,
   };
-  await placemark.update(propsToUpdate);
+  const placemarkPointInfo = { ...placemarkStore.placemarkForm.placemark_point };
+
+  await placemark.update(propsToUpdate, placemarkPointInfo);
   ((placemarkStore.placemarkNodes[0].children as QTreeNode[]).find((node) => node.id === id) as QTreeNode).label =
     placemarkStore.placemarkForm.name;
   cancelHandler();

@@ -2,6 +2,7 @@ import { placemarkAPI } from 'src/boot/axios';
 import { PlacemarkInfo } from 'src/types/PlacemarkService/PlacemarkInfo';
 import { Dialog, Notify, Loading } from 'quasar';
 import { HttpStatus } from 'src/types/HttpStatus';
+import { PlacemarkPointInfo } from 'src/types/PlacemarkService/PlacemarkPointInfo';
 
 const getAllPlacemarks = async (): Promise<PlacemarkInfo[]> => {
   Loading.show({
@@ -30,8 +31,12 @@ const createPlaceMarkInfo = async (form: Partial<PlacemarkInfo>): Promise<Placem
   return data;
 };
 
-const updatePlacemarkInfoById = async (id: string, form: Partial<PlacemarkInfo>): Promise<PlacemarkInfo> => {
-  const response = await placemarkAPI.put(`/placemarkinfo/${id}`, objectToFormData(form));
+const updatePlacemarkInfoById = async (
+  id: string,
+  form: Partial<PlacemarkInfo>,
+  placemarkPointForm: Partial<PlacemarkPointInfo>
+): Promise<PlacemarkInfo> => {
+  const response = await placemarkAPI.put(`/placemarkinfo/${id}`, objectToFormData({ ...form, ...placemarkPointForm }));
   let message = '';
   let type = '';
   if (response.status === HttpStatus.OK) {

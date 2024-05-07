@@ -260,7 +260,8 @@ const showHandler = (id: string) => {
 
 watch(visible, () => {
   if (!visible.value) {
-    placemarkStore.expanded = false;
+    placemarkStore.editExpanded = false;
+    placemarkStore.styleExpanded = false;
     placemarkService.setPlacemarkSelectedAction();
     placemarkService.setCursorPointerAction();
     placemarkService.selectedPlacemark?.setDefaultStyle();

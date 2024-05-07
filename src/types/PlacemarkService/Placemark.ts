@@ -1,8 +1,7 @@
 import { createImgSrc, getImageDimensions, getLeftTopLimitedInContainer } from 'src/tools/utils';
 import { PlacemarkInfo, PlacemarkInfoToSend } from './PlacemarkInfo';
 import { deletePlacemarkById, deletePlacemarkImageById, updatePlacemarkInfoById } from 'src/api/placemark_api';
-import { PlacemarkNode } from './PlacemarkNode';
-import { BillboardGraphics, JulianDate, LabelGraphics } from 'cesium';
+import { PlacemarkPointInfo } from './PlacemarkPointInfo';
 
 interface RequiredPointGraphicsOptions extends Cesium.Entity.ConstructorOptions {
   point: Cesium.PointGraphics | Cesium.PointGraphics.ConstructorOptions;
@@ -20,17 +19,37 @@ class Placemark extends Cesium.Entity {
   }
 
   setDefaultStyle() {
-    (this.point as Cesium.PointGraphics).color = new Cesium.ConstantProperty(Cesium.Color.BLUE);
-    (this.point as Cesium.PointGraphics).pixelSize = new Cesium.ConstantProperty(10);
+    (this.point as Cesium.PointGraphics).color = new Cesium.ConstantProperty(
+      Cesium.Color.fromCssColorString(this.info.placemark_point.default_color)
+    );
+    (this.point as Cesium.PointGraphics).pixelSize = new Cesium.ConstantProperty(
+      this.info.placemark_point.default_pixel_size
+    );
+    (this.point as Cesium.PointGraphics).outlineColor = new Cesium.ConstantProperty(
+      Cesium.Color.fromCssColorString(this.info.placemark_point.default_outline_color)
+    );
+    (this.point as Cesium.PointGraphics).outlineWidth = new Cesium.ConstantProperty(
+      this.info.placemark_point.default_outline_width
+    );
   }
 
   setHighlightStyle() {
-    (this.point as Cesium.PointGraphics).color = new Cesium.ConstantProperty(Cesium.Color.RED);
-    (this.point as Cesium.PointGraphics).pixelSize = new Cesium.ConstantProperty(20);
+    (this.point as Cesium.PointGraphics).color = new Cesium.ConstantProperty(
+      Cesium.Color.fromCssColorString(this.info.placemark_point.highlight_color)
+    );
+    (this.point as Cesium.PointGraphics).pixelSize = new Cesium.ConstantProperty(
+      this.info.placemark_point.highlight_pixel_size
+    );
+    (this.point as Cesium.PointGraphics).outlineColor = new Cesium.ConstantProperty(
+      Cesium.Color.fromCssColorString(this.info.placemark_point.highlight_outline_color)
+    );
+    (this.point as Cesium.PointGraphics).outlineWidth = new Cesium.ConstantProperty(
+      this.info.placemark_point.highlight_outline_width
+    );
   }
 
-  async update(propsToUpdate: PlacemarkInfoToSend) {
-    await this.updateInfo(propsToUpdate);
+  async update(propsToUpdate: Partial<PlacemarkInfo>, placemarkPointInfo: PlacemarkPointInfo) {
+    await this.updateInfo(propsToUpdate, placemarkPointInfo);
     await this.updateCesiumInfoFromPanel();
   }
 
@@ -55,6 +74,7 @@ class Placemark extends Cesium.Entity {
     } else {
       billboard.image = undefined;
     }
+    this.setDefaultStyle();
   }
 
   async clearPlacemarkImage() {
@@ -63,8 +83,8 @@ class Placemark extends Cesium.Entity {
     (this.billboard as Cesium.BillboardGraphics).image = undefined;
   }
 
-  async updateInfo(propsToUpdate: PlacemarkInfoToSend) {
-    const placemarkInfo = await updatePlacemarkInfoById(this.info.id, propsToUpdate);
+  async updateInfo(propsToUpdate: Partial<PlacemarkInfo>, placemarkPointInfo: PlacemarkPointInfo) {
+    const placemarkInfo = await updatePlacemarkInfoById(this.info.id, propsToUpdate, placemarkPointInfo);
 
     this.info = placemarkInfo;
     // this.nodes.label = this.info.name as string;

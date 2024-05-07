@@ -133,8 +133,8 @@ class PlacemarkService {
   }
 
   async createAndSavePlaceMark(cartesian: Cesium.Cartesian3) {
-    const placemarkInfoForm: PlacemarkInfoToSend = getSpatialInfo(cartesian);
-    const placemarkInfo = await createPlaceMarkInfo(placemarkInfoForm);
+    const info = getSpatialInfo(cartesian);
+    const placemarkInfo = await createPlaceMarkInfo(info);
 
     const placemark = this.createPlaceMark(placemarkInfo);
 
@@ -186,14 +186,26 @@ class PlacemarkService {
       cartesian_x: 0,
       cartesian_y: 0,
       cartesian_z: 0,
+      placemark_point: {
+        default_pixel_size: 10,
+        default_color: '#0000FF',
+        default_outline_color: '#FFFFFF',
+        default_outline_width: 2,
+        highlight_pixel_size: 20,
+        highlight_color: '#FF0000',
+        highlight_outline_color: '#FFFFFF',
+        highlight_outline_width: 2,
+      },
     }
   ) {
     const placemark = new Placemark(
       {
         id: placemarkInfo.id,
         point: {
-          outlineColor: Cesium.Color.WHITE,
-          outlineWidth: 2,
+          outlineColor: Cesium.Color.fromCssColorString(placemarkInfo.placemark_point.default_outline_color),
+          outlineWidth: placemarkInfo.placemark_point.default_outline_width,
+          pixelSize: placemarkInfo.placemark_point.default_pixel_size,
+          color: Cesium.Color.fromCssColorString(placemarkInfo.placemark_point.default_color),
         },
         label: {
           show: true,
