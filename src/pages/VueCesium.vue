@@ -1,47 +1,5 @@
 <template>
   <q-page :style-fn="myTweak">
-    <q-bar class="bg-black text-white" ref="barRef">
-      <div class="cursor-pointer">File</div>
-      <div class="cursor-pointer">Edit</div>
-      <div class="cursor-pointer gt-xs">
-        View
-        <q-menu class="z-top">
-          <q-list dense style="min-width: 180px">
-            <q-item tag="label" clickable v-close-popup>
-              <q-item-section> <q-checkbox v-model="animation" /> </q-item-section>
-              <q-item-section>动画</q-item-section>
-            </q-item>
-            <q-item tag="label" clickable v-close-popup>
-              <q-item-section> <q-checkbox v-model="timeline" /> </q-item-section>
-              <q-item-section>时间轴</q-item-section>
-            </q-item>
-            <q-item tag="label" clickable v-close-popup>
-              <q-item-section> <q-checkbox v-model="baseLayerPicker" /> </q-item-section>
-              <q-item-section>基础图层</q-item-section>
-            </q-item>
-            <q-item tag="label" clickable v-close-popup>
-              <q-item-section> <q-checkbox v-model="fullscreenButton" /> </q-item-section>
-              <q-item-section>全盘按钮</q-item-section>
-            </q-item>
-            <q-item tag="label" clickable v-close-popup>
-              <q-item-section> <q-checkbox v-model="infoBox" /> </q-item-section>
-              <q-item-section>信息提示框</q-item-section>
-            </q-item>
-            <q-item tag="label" clickable v-close-popup>
-              <q-item-section> <q-checkbox v-model="showCredit" /> </q-item-section>
-              <q-item-section>版权信息</q-item-section>
-            </q-item>
-          </q-list>
-        </q-menu>
-      </div>
-      <div class="cursor-pointer">
-        Search
-        <search-input v-if="!loading"></search-input>
-      </div>
-      <div class="cursor-pointer gt-xs">Window</div>
-      <div class="cursor-pointer">Help</div>
-      <q-space />
-    </q-bar>
     <vc-viewer
       id="cesiumContainer"
       :animation="animation"
@@ -52,7 +10,7 @@
       :info-box="infoBox"
       :skyAtmosphere="false"
       :skyBox="false"
-      :scene-mode-picker="true"
+      :scene-mode-picker="false"
       :show-credit="showCredit"
       @ready="ready"
     >
@@ -63,11 +21,55 @@
         @zoom-evt="onNavigationEvt"
       ></vc-navigation>
 
+      <q-bar class="transparent text-white absolute z-max" ref="barRef" style="height: 40px">
+        <div class="cursor-pointer">
+          <div id="baseMapPicker" ref="baseMapPickerRef" class="cursor-pointer"></div>
+        </div>
+        <div class="cursor-pointer">
+          <q-icon name="widgets" size="30px" class="cesium-button cesium-toolbar-button"></q-icon>
+          <q-menu class="z-top">
+            <q-list dense style="min-width: 180px">
+              <q-item tag="label" clickable v-close-popup>
+                <q-item-section> <q-checkbox v-model="animation" /> </q-item-section>
+                <q-item-section>动画</q-item-section>
+              </q-item>
+              <q-item tag="label" clickable v-close-popup>
+                <q-item-section> <q-checkbox v-model="timeline" /> </q-item-section>
+                <q-item-section>时间轴</q-item-section>
+              </q-item>
+              <q-item tag="label" clickable v-close-popup>
+                <q-item-section> <q-checkbox v-model="fullscreenButton" /> </q-item-section>
+                <q-item-section>全盘按钮</q-item-section>
+              </q-item>
+              <q-item tag="label" clickable v-close-popup>
+                <q-item-section> <q-checkbox v-model="infoBox" /> </q-item-section>
+                <q-item-section>信息提示框</q-item-section>
+              </q-item>
+              <q-item tag="label" clickable v-close-popup>
+                <q-item-section> <q-checkbox v-model="showCredit" /> </q-item-section>
+                <q-item-section>版权信息</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </div>
+        <div class="cursor-pointer">
+          <div id="projectionPicker" ref="projectionPickerRef" class="cursor-pointer"></div>
+        </div>
+        <div class="cursor-pointer">
+          <div id="sceneModePicker" ref="sceneModePickerRef" class="cursor-pointer"></div>
+        </div>
+        <div class="cursor-pointer">
+          <q-icon name="search" size="30px" class="cesium-button cesium-toolbar-button"></q-icon>
+          <search-input v-if="!loading"></search-input>
+        </div>
+        <q-space />
+      </q-bar>
+
       <WindMap :windData="windData" v-if="visualizationOptionsStore.overlayWindMap"></WindMap>
       <new-place-mark-panel v-if="!loading"></new-place-mark-panel>
 
       <!-- Cesium Imagery -->
-      <vc-layer-imagery>
+      <!-- <vc-layer-imagery>
         <vc-imagery-provider-tianditu
           map-style="img_c"
           token="436ce7e50d27eede2f2929307e6b33c0"
@@ -78,7 +80,7 @@
           map-style="cia_c"
           token="436ce7e50d27eede2f2929307e6b33c0"
         ></vc-imagery-provider-tianditu>
-      </vc-layer-imagery>
+      </vc-layer-imagery> -->
 
       <!-- <tool-bar></tool-bar> -->
       <properties-panel
@@ -93,9 +95,9 @@
 </template>
 
 <script setup lang="ts">
-import { VcCompassEvt, VcZoomEvt } from 'vue-cesium/es/utils/types';
+import { VcCompassEvt, VcReadyObject, VcZoomEvt } from 'vue-cesium/es/utils/types';
 
-import { ref, watch, getCurrentInstance, ComponentInternalInstance } from 'vue';
+import { ref, watch, getCurrentInstance, ComponentInternalInstance, onMounted } from 'vue';
 import { loadNetCDF } from 'src/tools/utils';
 import { NetCDFData } from 'src/types/NetCDFData';
 import WindMap from 'src/components/WindMap.vue';
@@ -106,12 +108,17 @@ import SearchInput from 'src/components/widgets/SearchInput.vue';
 import { useVisualizationOptionsStore } from 'src/stores/VisualizationOptionsStore';
 
 import NewPlaceMarkPanel from 'src/components/widgets/VisualizationOptions/AddPlaceMarkOption/NewPlaceMarkPanel.vue';
+import { BaseMapService } from 'src/types/BaseMapService/BaseMapService';
+import { Loading } from 'quasar';
 
 const barRef = ref();
 const loading = ref(true);
 const animation = ref(true);
 const timeline = ref(true);
-const baseLayerPicker = ref(true);
+const baseMapPickerRef = ref<HTMLDivElement>();
+const projectionPickerRef = ref<HTMLDivElement>();
+const sceneModePickerRef = ref<HTMLDivElement>();
+const baseLayerPicker = ref(false);
 const fullscreenButton = ref(false);
 const infoBox = ref(false);
 // const terrain = Cesium.Terrain.fromWorldTerrain();
@@ -150,14 +157,31 @@ const onNavigationEvt = (e: VcCompassEvt | VcZoomEvt) => {
   console.log(e);
 };
 
-const ready = () => {
+const ready = async (readyObj: VcReadyObject) => {
+  Loading.show({
+    message: 'Loading Earth...',
+  });
   // window.vm = this;
+
+  const baseMapService = new BaseMapService(readyObj.viewer, baseMapPickerRef.value as HTMLDivElement);
+  await baseMapService.initBaseMap();
+  new Cesium.ProjectionPicker(projectionPickerRef.value as HTMLDivElement, readyObj.viewer.scene);
+  new Cesium.SceneModePicker(sceneModePickerRef.value as HTMLDivElement, readyObj.viewer.scene);
+
+  // baseMapService.initTerrain();
+  // new Cesium.BaseLayerPicker(baseMapPickerRef.value as HTMLDivElement, {
+  //   globe: readyObj.viewer.scene.globe,
+  //   imageryProviderViewModels: baseMapService.imageryViewModels,
+  //   terrainProviderViewModels: baseMapService.viewModel.terrainProviderViewModels,
+  // });
+  // baseLayerPicker.value = false;
 
   loadNetCDF('https://zouyaoji.top/vue-cesium/SampleData/wind/demo.nc').then((data) => {
     console.log(data);
     windData.value = data;
   });
   loading.value = false;
+  Loading.hide();
 };
 
 // 获取全局事件监听对象
@@ -175,7 +199,7 @@ $emitter.on('propertiesPanelStateChange', (value: any) => {
 
 const myTweak = (offset: number) => {
   return {
-    height: `calc(100vh - ${offset + 32}px)`,
+    height: `calc(100vh - ${offset}px)`,
   };
 };
 </script>
@@ -184,5 +208,8 @@ const myTweak = (offset: number) => {
 #cesiumContainer {
   // height: 80vh !important;
   position: relative;
+}
+.cesium-baseLayerPicker-dropDown {
+  left: 1vh;
 }
 </style>

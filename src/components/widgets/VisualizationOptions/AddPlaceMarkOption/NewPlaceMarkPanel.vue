@@ -13,7 +13,7 @@
     <!-- <q-card-section class="row items-center q-pb-sm"> -->
     <q-toolbar class="bg-primary text-white glossy">
       <q-avatar rounded icon="add_location" size="xl"></q-avatar>
-      <q-toolbar-title><span class="text-weight-bold">New Placemark</span></q-toolbar-title>
+      <q-toolbar-title><span class="text-weight-bold">Placemark</span></q-toolbar-title>
       <q-btn icon="close" flat round dense v-close-popup @click="cancelHandler" />
     </q-toolbar>
     <!-- <div class="text-h6"></div> -->

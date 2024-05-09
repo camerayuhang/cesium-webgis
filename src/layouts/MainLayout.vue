@@ -1,21 +1,36 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <q-header elevated>
+    <q-header elevated class="row justify-between">
       <q-toolbar>
         <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
 
-        <q-toolbar-title> Fish Free </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
+        <q-toolbar-title> Cesium Map </q-toolbar-title>
+        <div>
+          <span class="text-bold">Created by:</span>
+          <!-- <q-item tag="a" href="https://github.com/camerayuhang" clickable target="_blank"> -->
+          <q-chip clickable @click="openPage('https://github.com/camerayuhang')">
+            <q-avatar class="contributor">
+              <img src="	https://avatars.githubusercontent.com/u/93120000?s=48&v=4" />
+            </q-avatar>
+            camerayuhang
+          </q-chip>
+          <q-chip clickable @click="openPage('https://github.com/ThreeLeaves66')">
+            <q-avatar class="contributor">
+              <img src="https://avatars.githubusercontent.com/u/90537777?v=4" />
+            </q-avatar>
+            ThreeLeaves66
+          </q-chip>
+        </div>
       </q-toolbar>
-      <q-tabs align="left">
+
+      <!-- <q-tabs align="left">
         <q-route-tab
           v-for="tablink in tabLinks"
           :key="tablink.title"
           :label="tablink.title"
           :to="tablink.link"
         ></q-route-tab>
-      </q-tabs>
+      </q-tabs> -->
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" side="left" bordered>
@@ -95,8 +110,17 @@ const essentialLinks: EssentialLinkProps[] = [
 ];
 
 const leftDrawerOpen = ref(false);
+const openPage = (link: string) => {
+  window.open(link, '_blank');
+};
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
 </script>
+
+<style scoped lang="scss">
+.contributor {
+  font-size: 2em;
+}
+</style>

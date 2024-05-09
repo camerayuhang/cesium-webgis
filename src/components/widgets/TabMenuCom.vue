@@ -42,7 +42,7 @@ const tab = ref('MapOptions');
   // background: rgba($color: #16073e, $alpha: 0.5);
   position: absolute;
   left: 5vh;
-  top: 2vh;
+  top: 6vh;
   .content {
     height: 60vh;
     // overflow: scroll;
