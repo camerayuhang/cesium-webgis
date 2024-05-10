@@ -78,7 +78,9 @@ class PlacemarkService {
   setPlacemarkSelectedAction() {
     this.handler.setInputAction((event: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
       const pickedObject = this.scene.pick(event.position);
-      if (Cesium.defined(pickedObject) && pickedObject.id) {
+      console.log(pickedObject);
+
+      if (Cesium.defined(pickedObject) && pickedObject.id && pickedObject.id instanceof Placemark) {
         this.hideNewPlacemarkPanel();
         this.selectedPlacemark = pickedObject.id as Placemark;
 

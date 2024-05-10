@@ -89,60 +89,6 @@
         </div>
       </template>
     </q-tree>
-    <!-- <q-tree no-transition :nodes="placemarkStore.treeNodes" node-key="id" label-key="label" dense>
-      <template v-slot:default-header="prop">
-        <div class="row items-center">
-          <q-checkbox
-            v-model="prop.node.entityVisibility"
-            @update:model-value="
-              (value, event) => {
-                visibilityHander(value, prop.node.id);
-              }
-            "
-            dense
-            v-if="!prop.node.header"
-          ></q-checkbox>
-          <q-icon :name="prop.node.icon || 'push_pin'" color="orange" class="rotate-45 q-mr-xs" />
-          <div class="text-weight-bold text-primary">{{ prop.node.label }}</div>
-        </div>
-      </template>
-
-      <template v-slot:default-body="prop">
-        <div v-if="!prop.node.header" class="column rounded-borders">
-          <div class="row q-ma-xs q-gutter-xs">
-            <q-btn size="sm" dense round color="secondary" icon="navigation" />
-            <q-btn size="sm" dense round color="deep-orange" icon="edit_location" />
-            <q-btn size="sm" dense round color="red" icon="delete" @click="deleteHandelr(prop.node.id)" />
-          </div>
-          <div class="column">
-            <q-checkbox
-              dense
-              color="teal"
-              v-model="prop.node.labelVisibility"
-              @update:model-value="
-                (value, event) => {
-                  visibilityHander(value, prop.node.id);
-                }
-              "
-              label="Label"
-            />
-            <q-checkbox
-              dense
-              color="cyan"
-              v-model="prop.node.billboardVisibility"
-              @update:model-value="
-                (value, event) => {
-                  visibilityHander(value, prop.node.id);
-                }
-              "
-              label="Billboard"
-            />
-          </div>
-        </div>
-      </template>
-    </q-tree> -->
-
-    <!-- <q-tree :nodes="placemarkStore.placemarkNodes" node-key="label" /> -->
   </q-item>
   <q-item>
     <q-btn
@@ -258,15 +204,23 @@ const showHandler = (id: string) => {
   placemarkService.showNewPlacemarkPanel(placemarkService.selectedPlacemark);
 };
 
-watch(visible, () => {
-  if (!visible.value) {
-    placemarkStore.editExpanded = false;
-    placemarkStore.styleExpanded = false;
-    placemarkService.setPlacemarkSelectedAction();
-    placemarkService.setCursorPointerAction();
-    placemarkService.selectedPlacemark?.setDefaultStyle();
+watch(
+  visible,
+  () => {
+    console.log(visible.value);
+
+    if (!visible.value) {
+      placemarkStore.editExpanded = false;
+      placemarkStore.styleExpanded = false;
+      placemarkService.setPlacemarkSelectedAction();
+      placemarkService.setCursorPointerAction();
+      placemarkService.selectedPlacemark?.setDefaultStyle();
+    }
+  },
+  {
+    immediate: false,
   }
-});
+);
 
 onUnmounted(() => {
   if (placemarkService.movingPlacemark) {

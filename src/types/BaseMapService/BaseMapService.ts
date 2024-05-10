@@ -143,6 +143,10 @@ class BaseMapService {
       requestWaterMask: true,
       requestVertexNormals: true,
     });
+    const mars3dTerrainProvider = await Cesium.CesiumTerrainProvider.fromUrl('http://data.mars3d.cn/terrain', {
+      requestWaterMask: true,
+      requestVertexNormals: true,
+    });
 
     const ellipsoidTerrainViewModel = new Cesium.ProviderViewModel({
       name: 'WGS84 Ellipsoid',
@@ -165,8 +169,19 @@ class BaseMapService {
       },
     });
 
+    const mars3dTerrainViewModel = new Cesium.ProviderViewModel({
+      iconUrl: 'http://ecs.mars3d.cn/config/thumbnail/map-terrain-terrainProvider.jpg',
+      name: 'Mars3D Terrain',
+      tooltip: 'Mars3D Terrain',
+      category: 'My terrains',
+      creationFunction: () => {
+        return mars3dTerrainProvider;
+      },
+    });
+
     this.terrainViewModels.push(ellipsoidTerrainViewModel);
     this.terrainViewModels.push(cesiumTerrainViewModel);
+    this.terrainViewModels.push(mars3dTerrainViewModel);
   }
 }
 

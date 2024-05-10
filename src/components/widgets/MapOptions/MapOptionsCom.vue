@@ -107,10 +107,6 @@ watch(mapOptions, (newValue) => {
   globe.show = newValue.globeShow;
   globe.depthTestAgainstTerrain = newValue.globeDepthTestAgainstTerrain;
 });
-onMounted(() => {
-  console.log('mounted');
-  // console.log(vcViewer.viewer);
-});
 </script>
 
 <style lang="scss" scoped></style>

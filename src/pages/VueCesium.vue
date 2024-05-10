@@ -62,6 +62,7 @@
           <q-icon name="search" size="30px" class="cesium-button cesium-toolbar-button"></q-icon>
           <search-input v-if="!loading"></search-input>
         </div>
+        <draw-tools></draw-tools>
         <q-space />
       </q-bar>
 
@@ -95,7 +96,7 @@
 </template>
 
 <script setup lang="ts">
-import { VcCompassEvt, VcReadyObject, VcZoomEvt } from 'vue-cesium/es/utils/types';
+import { VcActionTooltipProps, VcCompassEvt, VcReadyObject, VcZoomEvt } from 'vue-cesium/es/utils/types';
 
 import { ref, watch, getCurrentInstance, ComponentInternalInstance, onMounted } from 'vue';
 import { loadNetCDF } from 'src/tools/utils';
@@ -106,10 +107,10 @@ import PanoramicMapPanel from 'src/components/widgets/VisualizationOptions/Panor
 import PropertiesPanel from 'src/components/widgets/PropertiesPanel.vue';
 import SearchInput from 'src/components/widgets/SearchInput.vue';
 import { useVisualizationOptionsStore } from 'src/stores/VisualizationOptionsStore';
-
 import NewPlaceMarkPanel from 'src/components/widgets/VisualizationOptions/AddPlaceMarkOption/NewPlaceMarkPanel.vue';
 import { BaseMapService } from 'src/types/BaseMapService/BaseMapService';
 import { Loading } from 'quasar';
+import DrawTools from 'src/components/widgets/DrawingTool/DrawTools.vue';
 
 const barRef = ref();
 const loading = ref(true);
@@ -180,6 +181,7 @@ const ready = async (readyObj: VcReadyObject) => {
     console.log(data);
     windData.value = data;
   });
+  readyObj.viewer.scene.globe.depthTestAgainstTerrain = true;
   loading.value = false;
   Loading.hide();
 };
@@ -204,12 +206,41 @@ const myTweak = (offset: number) => {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 #cesiumContainer {
   // height: 80vh !important;
   position: relative;
 }
 .cesium-baseLayerPicker-dropDown {
   left: 1vh;
+}
+
+:deep(.vc-drawings-container) {
+  position: relative;
+  margin-left: 8px !important;
+  .vc-fab {
+    background: none !important;
+    > .vc-btn {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      min-height: 32px;
+      padding: 0;
+      border-radius: 14%;
+      background: #303336;
+      border: 1px solid #444;
+      color: #edffff;
+      fill: #edffff;
+      vertical-align: middle;
+      margin: 2px 3px;
+      &:hover {
+        color: #fff;
+        fill: #fff;
+        background: #48b;
+        border-color: #aef;
+        box-shadow: 0 0 8px #fff;
+      }
+    }
+  }
 }
 </style>
